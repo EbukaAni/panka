@@ -1,0 +1,300 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator cron {
+  provider = "prisma-client-js"
+  output   = "../../cron/node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model User {
+  id        Int        @id @default(autoincrement())
+  googleId  String
+  email     String
+  name      String
+  picture   String?
+  status    UserStatus
+  createdAt DateTime   @default(now())
+  updated   DateTime   @default(now())
+  deletedAt DateTime?
+
+  ledgerEntries     LedgerEntry[]
+  business          Business?
+  clients           Client[]
+  invoices          Invoice[]
+  recurringInvoices RecurringInvoice[]
+  subscription      Subscription?
+  mailsendToken     mailSendToken?
+  card              Card?
+
+  @@unique([email, status], name: "uq_email_status")
+  @@map("users")
+}
+
+model Business {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+  name      String
+  email     String   @unique
+  address   String?
+  phone     String?
+  logo      String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("businesses")
+}
+
+model Client {
+  id                Int                @id @default(autoincrement())
+  userId            Int
+  name              String
+  email             String
+  phone             String?
+  address           String?
+  createdAt         DateTime           @default(now())
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  invoices          Invoice[]
+  recurringInvoices RecurringInvoice[]
+
+  @@unique([userId, email], name: "uq_userid_email")
+  @@index([userId], map: "client_userId_fkey")
+  @@map("client")
+}
+
+model Invoice {
+  id            Int           @id @default(autoincrement())
+  invoiceNumber Int           @unique
+  userId        Int
+  clientId      Int
+  sendStatus    SendStatus
+  status        InvoiceStatus @default(UNPAID)
+  issueDate     DateTime      @db.Date
+  dueDate       DateTime      @db.Date
+  discount      Decimal?      @db.Decimal(12, 2)
+  tax           Decimal?      @db.Decimal(12, 2)
+  currency      String        @default("USD") @db.Char(3)
+  notes         String?
+  terms         String?
+  total         Int
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  items         InvoiceItem[]
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  client        Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "invoices_userId_fkey")
+  @@index([clientId], map: "invoices_clientId_fkey")
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id          Int      @id @default(autoincrement())
+  invoiceId   Int
+  description String
+  quantity    Int
+  rate        Decimal  @db.Decimal(12, 2)
+  createdAt   DateTime @default(now())
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId], map: "invoiceItems_invoiceId_fkey")
+  @@map("invoiceItems")
+}
+
+model RecurringInvoice {
+  id              Int                     @id @default(autoincrement())
+  userId          Int
+  clientId        Int
+  frequency       RecurringFrequency
+  startDate       DateTime                @db.Date
+  dueDateInterval Int
+  nextIssueDate   DateTime                @db.Date
+  sentCount       Int                     @default(0)
+  lastSent        DateTime?               @db.Date
+  status          RecurringStatus
+  discount        Decimal?                @db.Decimal(12, 2)
+  tax             Decimal?                @db.Decimal(12, 2)
+  currency        String                  @default("USD") @db.Char(3)
+  notes           String?
+  terms           String?
+  saveToDrive     Boolean                 @default(false)
+  createdAt       DateTime                @default(now())
+  items           RecurringInvoiceItems[]
+  client          Client                  @relation(fields: [clientId], references: [id])
+  user            User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([clientId], map: "recurringInvoices_clientId_fkey")
+  @@index([userId], map: "recurringInvoices_userId_fkey")
+  @@map("recurringInvoices")
+}
+
+model RecurringInvoiceItems {
+  id          Int              @id @default(autoincrement())
+  invoiceId   Int
+  description String
+  quantity    Int
+  rate        Decimal          @db.Decimal(12, 2)
+  createdAt   DateTime         @default(now())
+  invoice     RecurringInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId], map: "recurringInvoiceItems_invoiceId_fkey")
+  @@map("recurringInvoiceItems")
+}
+
+model mailSendToken {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @unique
+  accessToken  String   @db.Text
+  refreshToken String   @db.Text
+  createdAt    DateTime @default(now())
+  scopes       Json
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Subscription {
+  id                Int                @id @default(autoincrement())
+  userId            Int                @unique
+  planId            Int
+  startDate         DateTime
+  endDate           DateTime?
+  status            SubscriptionStatus
+  localDataMigrated Boolean            @default(false)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @default(now())
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan              Plan               @relation(fields: [planId], references: [id])
+
+  @@map("subscriptions")
+}
+
+model Plan {
+  id          Int      @id @default(autoincrement())
+  providerId  String?
+  name        String   @unique
+  price       Int
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+
+  planFeatures  PlanFeatures[]
+  subscriptions Subscription[]
+}
+
+model PlanFeatures {
+  id        Int      @id @default(autoincrement())
+  planId    Int
+  featureId Int
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  plan    Plan    @relation(fields: [planId], references: [id], onDelete: Cascade)
+  feature Feature @relation(fields: [featureId], references: [id], onDelete: Cascade)
+}
+
+model Feature {
+  id          Int         @id @default(autoincrement())
+  name        String      @unique
+  type        FeatureType
+  description String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @default(now())
+
+  featurePlans PlanFeatures[]
+}
+
+model LedgerEntry {
+  id                    Int             @id @default(autoincrement())
+  userId                Int
+  amount                Int
+  status                LedgerStatus
+  transactionType       TransactionType
+  paymentMethod         String
+  externalTransactionId Int             @unique
+  createdAt             DateTime        @default(now())
+  user                  User            @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Card {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+  type      String
+  ending    String
+  createdAt DateTime @unique @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model sessions {
+  session_id String  @id @db.VarChar(128)
+  expires    Int     @db.UnsignedInt
+  data       String? @db.MediumText
+}
+
+model IdempotencyKey {
+  key       String   @id @db.VarChar(255)
+  response  Json // Caches the successful response payload
+  createdAt DateTime @default(now())
+}
+
+enum UserStatus {
+  ACTIVE
+  DELETED
+}
+
+enum FeatureType {
+  LIMIT
+  BOOLEAN
+}
+
+enum SendStatus {
+  SENT
+  FAILED
+  NULL
+}
+
+enum InvoiceStatus {
+  UNPAID
+  PAID
+}
+
+enum RecurringFrequency {
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+enum RecurringStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  CANCELING
+  PAST_DUE
+  EXPIRED
+}
+
+enum LedgerStatus {
+  PAID
+  FAILED
+  REFUNDED
+  PENDING
+  CANCELED
+}
+
+enum TransactionType {
+  SUBSCRIPTION_START
+  RENEWAL
+}

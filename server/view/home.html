@@ -1,0 +1,891 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pankas — Invoicing for your browser</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --paper: #fbdcd1;
+        --paper-alt: #fcf3e1;
+        --ink: #191530;
+        --ink-soft: #4a4560;
+        --muted: #7a7590;
+        --line: #e4deef;
+        --purple: #2a546d;
+        --purple-deep: #397294;
+        --purple-tint: #efeafb;
+        --amber: #c8a96e;
+        --white: #ffffff;
+        --radius-sm: 4px;
+        --maxw: 1060px;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        background: var(--white);
+        color: var(--ink);
+        font-family: "Inter", sans-serif;
+        font-size: 16px;
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      h1,
+      h2,
+      h3 {
+        font-family: "Source Serif 4", serif;
+        color: var(--ink);
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+
+      a {
+        color: inherit;
+      }
+      .num {
+        font-family: "IBM Plex Mono", monospace;
+      }
+
+      .wrap {
+        max-width: var(--maxw);
+        margin: 0 auto;
+        padding: 0 32px;
+      }
+
+      /* ---------- Buttons ---------- */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-family: "Inter", sans-serif;
+        font-weight: 600;
+        font-size: 15px;
+        padding: 8px 26px;
+        border-radius: var(--radius-sm);
+        border: 1px solid transparent;
+        cursor: pointer;
+        text-decoration: none;
+        transition:
+          background 0.15s ease,
+          border-color 0.15s ease,
+          transform 0.15s ease;
+      }
+      .btn-primary {
+        background: var(--purple);
+        color: var(--white);
+      }
+      .btn-primary:hover {
+        background: var(--purple-deep);
+      }
+      .btn-primary:focus-visible {
+        outline: 2px solid var(--ink);
+        outline-offset: 2px;
+      }
+
+      .btn-ghost {
+        background: transparent;
+        color: var(--ink);
+        border-color: var(--muted);
+      }
+      .btn-ghost:hover {
+        border-color: var(--ink);
+      }
+      .btn-ghost:focus-visible {
+        outline: 2px solid var(--ink);
+        outline-offset: 2px;
+      }
+
+      /* ---------- Header ---------- */
+      header {
+        padding: 12px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      header .wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .logo {
+        color: var(--purple);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: "Source Serif 4", serif;
+        font-weight: 600;
+        font-size: 21px;
+      }
+      .logo-mark {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      nav ul {
+        display: flex;
+        gap: 32px;
+        list-style: none;
+      }
+      nav a {
+        text-decoration: none;
+        font-size: 14.5px;
+        color: var(--ink-soft);
+      }
+      nav a:hover {
+        color: var(--ink);
+      }
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+
+      /* ---------- Hero ---------- */
+      .hero {
+        padding: 40px 0 40px;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero .wrap {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 10px;
+        align-items: center;
+      }
+      .hero-copy h1 {
+        font-size: clamp(2.3rem, 4vw, 3.25rem);
+        line-height: 1.08;
+        max-width: 16ch;
+        font-weight: 700;
+      }
+      .hero-copy p {
+        margin-top: 22px;
+        font-size: 16px;
+        color: var(--ink-soft);
+      }
+
+      .hero img {
+        max-width: 400px;
+      }
+      .hero-actions {
+        margin-top: 34px;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        flex-wrap: wrap;
+      }
+      .hero-note {
+        font-size: 13.5px;
+        color: var(--muted);
+      }
+
+      /* ---------- Trust line ---------- */
+      .trustline {
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+        padding: 22px 0;
+        background: var(--paper-alt);
+      }
+      .trustline .wrap {
+        display: flex;
+        justify-content: center;
+        text-align: center;
+      }
+      .trustline p {
+        color: var(--ink-soft);
+        font-size: 15px;
+        max-width: 56ch;
+      }
+
+      /* ---------- Section shared ---------- */
+      section {
+        padding: 18px 0;
+      }
+      .section-head {
+        max-width: 52ch;
+        margin-bottom: 36px;
+      }
+      .section-head h2 {
+        font-size: clamp(1.7rem, 3vw, 2.2rem);
+        line-height: 1.15;
+      }
+      .section-head p {
+        margin-top: 12px;
+        font-size: 15px;
+        color: var(--ink-soft);
+      }
+
+      /* ---------- Feature line items ---------- */
+      .ledger {
+        border-top: 1px solid var(--ink);
+      }
+      .ledger-row {
+        display: grid;
+        grid-template-columns: 44px 1fr 1.4fr;
+        gap: 28px;
+        align-items: start;
+        padding: 16px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .ledger-row .icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: var(--purple-tint);
+        color: var(--purple);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .ledger-row .icon svg {
+        width: 17px;
+        height: 17px;
+      }
+      .ledger-row h3 {
+        font-size: 19px;
+        font-weight: 600;
+      }
+      .ledger-row p {
+        color: var(--ink-soft);
+        font-size: 15.5px;
+        max-width: 46ch;
+      }
+
+      /* ---------- Premium band ---------- */
+      .premium {
+        background: var(--ink);
+        color: var(--paper);
+        border-radius: 16px;
+      }
+      .premium .wrap-inner {
+        padding: 56px 48px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 48px;
+      }
+      .premium h2 {
+        color: var(--paper);
+        font-size: 1.9rem;
+      }
+      .premium .tag {
+        display: inline-block;
+        color: var(--amber);
+        font-size: 13.5px;
+        font-weight: 600;
+        margin-bottom: 14px;
+      }
+      .premium p.lede {
+        color: #c4c0d6;
+        margin-top: 14px;
+        font-size: 16px;
+        max-width: 38ch;
+      }
+      .premium-list {
+        list-style: none;
+      }
+      .premium-list li {
+        display: flex;
+        gap: 14px;
+        padding: 16px 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.14);
+        font-size: 15px;
+        color: #d3d0e2;
+      }
+      .premium-list li:last-child {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+      }
+      .premium-list strong {
+        color: var(--paper);
+        font-weight: 600;
+        display: block;
+        font-family: "Source Serif 4", serif;
+        font-size: 16.5px;
+        margin-bottom: 3px;
+      }
+
+      .pricing-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 28px;
+        max-width: 760px;
+      }
+      .price-card {
+        position: relative;
+        background: var(--white);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+      }
+      .price-card.featured {
+        border: 1px solid var(--plan-color, var(--purple));
+        box-shadow: 0 24px 48px -26px rgba(25, 21, 48, 0.3);
+      }
+      .price-badge {
+        position: absolute;
+        top: -13px;
+        left: 32px;
+        background: var(--plan-color, var(--purple));
+        color: var(--white);
+        font-size: 12px;
+        font-weight: 600;
+        padding: 5px 12px;
+        border-radius: 999px;
+      }
+      .price-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--plan-color, var(--muted));
+        display: inline-block;
+        margin-right: 8px;
+      }
+      .price-card h3 {
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+      }
+      .price-amount {
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+      }
+      .price-amount .amount {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 32px;
+        font-weight: 500;
+        color: var(--ink);
+      }
+      .price-amount .period {
+        font-size: 14px;
+        color: var(--muted);
+      }
+      .price-features {
+        list-style: none;
+        margin: 16px 0px;
+        flex-grow: 1;
+      }
+      .price-features li {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        font-size: 14.5px;
+        color: var(--ink-soft);
+        padding: 8px 0;
+        border-top: 1px solid var(--line);
+      }
+      .price-features li:first-child {
+        border-top: none;
+      }
+      .price-features svg {
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+        margin-top: 2px;
+        color: var(--plan-color, var(--purple));
+      }
+      .price-card .btn {
+        justify-content: center;
+        width: 100%;
+      }
+
+      /* ---------- How it works ---------- */
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 36px;
+      }
+      .step .idx {
+        font-family: "IBM Plex Mono", monospace;
+        color: var(--purple);
+        font-size: 14px;
+        display: block;
+        margin-bottom: 14px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid var(--line);
+      }
+      .step h3 {
+        font-size: 18px;
+        margin-bottom: 8px;
+      }
+      .step p {
+        color: var(--ink-soft);
+        font-size: 15px;
+      }
+
+      /* ---------- Final CTA ---------- */
+      .cta-final {
+        background: var(--amber);
+        color: var(--white);
+        text-align: center;
+      }
+      .cta-final h2 {
+        color: var(--white);
+        font-size: clamp(1.8rem, 3.4vw, 2.4rem);
+      }
+      .cta-final p {
+        color: #e3dbfb;
+        margin: 16px auto 32px;
+        max-width: 42ch;
+      }
+      .cta-final .btn-primary {
+        background: var(--white);
+        color: var(--purple-deep);
+      }
+      .cta-final .btn-primary:hover {
+        background: #f1edfc;
+      }
+
+      /* ---------- Footer ---------- */
+      footer {
+        padding: 24px 0;
+      }
+      footer .wrap {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+      footer .logo {
+        font-size: 16px;
+      }
+      footer p {
+        color: var(--muted);
+        font-size: 13.5px;
+      }
+
+      /* ---------- Responsive ---------- */
+      @media (max-width: 860px) {
+        nav {
+          display: none;
+        }
+        .hero .wrap {
+          grid-template-columns: 1fr;
+        }
+        .hero-visual {
+          min-height: 400px;
+          order: -1;
+        }
+        .chip {
+          font-size: 11px;
+          padding: 7px 11px;
+        }
+        .premium .wrap-inner {
+          grid-template-columns: 1fr;
+          padding: 40px 28px;
+        }
+        .pricing-grid {
+          grid-template-columns: 1fr;
+          max-width: 420px;
+        }
+        .steps {
+          grid-template-columns: 1fr;
+        }
+        .ledger-row {
+          grid-template-columns: 36px 1fr;
+        }
+        .ledger-row p {
+          grid-column: 2/3;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+        * {
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="wrap">
+        <div class="logo">
+          <span class="logo-mark"><img src="logo.png" alt="" /></span>Pankas
+        </div>
+        <nav>
+          <ul>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#premium">Premium</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+            <li><a href="#how">How it works</a></li>
+          </ul>
+        </nav>
+        <div class="header-actions">
+          <a class="btn" href="/auth/google">Sign in</a>
+          <a
+            href="https://chromewebstore.google.com/detail/pankas/blipddhjepefmnklllfdeccbcmdnbbfb?hl=en-US&utm_source=ext_sidebar"
+            class="btn btn-primary"
+            >Add to Chrome</a
+          >
+        </div>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="wrap">
+        <div class="hero-copy">
+          <h1>Send an invoice before you close the tab.</h1>
+          <p>
+            Pankas is a Chrome extension that builds, exports, and sends
+            invoices without ever opening a separate app. Fill in the job, get a
+            PDF, done.
+          </p>
+          <div class="hero-actions">
+            <a
+              href="https://chromewebstore.google.com/detail/pankas/blipddhjepefmnklllfdeccbcmdnbbfb?hl=en-US&utm_source=ext_sidebar"
+              class="btn btn-primary"
+              >Add to Chrome</a
+            >
+            <a href="#how" class="btn btn-ghost">See how it works</a>
+          </div>
+          <p class="hero-note">
+            Free to install. No account required to get started.
+          </p>
+        </div>
+
+        <div>
+          <img src="hero.jpg" alt="hero image of an invoice" width="500px" />
+        </div>
+      </div>
+    </section>
+
+    <div class="trustline">
+      <div class="wrap">
+        <p>
+          Built for the small business owner doing the invoicing between
+          everything else — not a finance team, not an accountant. Just Pankas,
+          in a browser tab.
+        </p>
+      </div>
+    </div>
+
+    <section id="features">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Everything you need on the invoice, nothing extra around it.</h2>
+          <p>
+            Four things Pankas handles well, so you can get back to the job.
+          </p>
+        </div>
+        <div>
+          <div class="ledger-row">
+            <div class="icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                />
+                <path d="M14 2v6h6" />
+                <path d="M9 13h6M9 17h6" />
+              </svg>
+            </div>
+            <h3>Generate invoices</h3>
+            <p>
+              Add the customer, the line items, the amount — Pankas lays it out
+              as a proper invoice while you type.
+            </p>
+          </div>
+          <div class="ledger-row">
+            <div class="icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M12 15V3M7 10l5 5 5-5" />
+                <path d="M3 17v3a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3" />
+              </svg>
+            </div>
+            <h3>Export to PDF</h3>
+            <p>
+              Download a clean, print-ready PDF in one click. No formatting to
+              fix, no logo to re-upload.
+            </p>
+          </div>
+          <div class="ledger-row">
+            <div class="icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M17.5 19a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.4-1.5A5 5 0 0 0 6.5 19z"
+                />
+              </svg>
+            </div>
+            <h3>Save a copy to Drive</h3>
+            <p>
+              Every invoice can be filed straight to your Google Drive, so your
+              records stay put without extra steps.
+            </p>
+          </div>
+          <div class="ledger-row">
+            <div class="icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="2" y="4" width="20" height="16" rx="2" />
+                <path d="m22 6-10 7L2 6" />
+              </svg>
+            </div>
+            <h3>Email it to your customer</h3>
+            <p>
+              Send the invoice directly from the extension. No downloading,
+              attaching, and re-uploading to your inbox.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="premium">
+      <div class="wrap">
+        <div class="premium">
+          <div class="wrap-inner">
+            <div>
+              <span class="tag">Premium</span>
+              <h2>For the invoices that repeat.</h2>
+              <p class="lede">
+                Once you're billing the same customers on a schedule, Pankas
+                Premium takes the sending off your plate.
+              </p>
+            </div>
+            <ul class="premium-list">
+              <li>
+                <div>
+                  <strong>Recurring invoices</strong>
+                  Set a schedule once and Pankas generates and sends the invoice
+                  automatically, on time, every time.
+                </div>
+              </li>
+              <li>
+                <div>
+                  <strong>Cloud history and contacts</strong>
+                  Customer details and past invoices sync to the cloud, so your
+                  records follow you across devices.
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="pricing">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Simple pricing, no line items of its own.</h2>
+          <p>Start free. Upgrade when the invoices start repeating.</p>
+        </div>
+        <div class="pricing-grid">
+          <div class="price-card" style="--plan-color: #888888">
+            <h3><span class="price-dot"></span>Free</h3>
+            <div class="price-amount">
+              <span class="amount">$0</span>
+              <span class="period">/month</span>
+            </div>
+            <ul class="price-features">
+              <li>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12" /></svg
+                >PDF exports
+              </li>
+              <li>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12" /></svg
+                >Save a copy to Google Drive
+              </li>
+              <li>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12" /></svg
+                >Mail invoice to client
+              </li>
+              <li>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12" /></svg
+                >Local storage
+              </li>
+            </ul>
+            <a
+              href="https://chromewebstore.google.com/detail/pankas/blipddhjepefmnklllfdeccbcmdnbbfb?hl=en-US&utm_source=ext_sidebar"
+              class="btn btn-ghost"
+              >Add to Chrome</a
+            >
+          </div>
+
+          <div class="price-card featured" style="--plan-color: #c8a96e">
+            <span class="price-badge">Most popular</span>
+            <h3><span class="price-dot"></span>Pro</h3>
+            <div class="price-amount">
+              <span class="amount">$5</span>
+              <span class="period">/month</span>
+            </div>
+            <ul class="price-features">
+              <li>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12" /></svg
+                >Everything in Free
+              </li>
+              <li>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12" /></svg
+                >Automated recurring invoice generation
+              </li>
+              <li>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12" /></svg
+                >Cloud storage
+              </li>
+            </ul>
+            <a href="/subscribe?plan=pro" class="btn btn-primary"
+              >Upgrade to Pro</a
+            >
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="how">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>From job to paid, in three steps.</h2>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <span class="idx">01</span>
+            <h3>Fill in the details</h3>
+            <p>Customer, line items, amount. Pankas formats it as you go.</p>
+          </div>
+          <div class="step">
+            <span class="idx">02</span>
+            <h3>Export or send</h3>
+            <p>
+              Download the PDF, save it to Drive, or email it straight to your
+              customer.
+            </p>
+          </div>
+          <div class="step">
+            <span class="idx">03</span>
+            <h3>Automate the repeats</h3>
+            <p>
+              With Premium, schedule recurring invoices and keep a synced
+              history in the cloud.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-final">
+      <div class="wrap">
+        <h2>Get your next invoice out today.</h2>
+        <p>
+          Install Pankas from the Chrome Web Store and send your first invoice
+          in under a minute.
+        </p>
+        <a
+          href="https://chromewebstore.google.com/detail/pankas/blipddhjepefmnklllfdeccbcmdnbbfb?hl=en-US&utm_source=ext_sidebar"
+          class="btn btn-primary"
+          >Add to Chrome — free</a
+        >
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        <div class="logo">
+          <span class="logo-mark"><img src="logo.png" alt="" /></span>Pankas
+        </div>
+        <p>
+          © 2026 Pankas. Not affiliated with Google or the Chrome Web Store.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>
