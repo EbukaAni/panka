@@ -1,30 +1,21 @@
 import session from "express-session";
-import MySQLStore from "express-mysql-session";
-import mysql from "mysql2/promise";
+import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 import { prisma } from "../db.js";
 
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: 3306,
-  connectionLimit: 10,
-  waitForConnections: true,
+const store = new PrismaSessionStore(prisma, {
+  checkPeriod: 60 * 60 * 1000,
+  dbRecordIdIsSessionId: true,
+  dbRecordIdFunction: undefined,
 });
-
-const Store = MySQLStore(session);
-
-const sessionStore = new Store({}, pool);
 
 export const authSession = session({
   key: "session_cookie",
   secret: process.env.SESSION_SECRET || "",
-  store: sessionStore,
+  store: store,
   resave: false,
   saveUninitialized: false,
   cookie: {
-    maxAge: 1000 * 60 * 60 * 24 * 7,
+    maxAge: 1000 * 60 * 60 * 24 * 1,
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",

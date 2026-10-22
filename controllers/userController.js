@@ -1,4 +1,3 @@
-import { email } from "zod";
 import { prisma } from "../db.js";
 import { getSubscriptionId } from "./subscriptionController.js";
 
@@ -11,7 +10,7 @@ const find = async (req, res) => {
       subscription: {
         include: { plan: true },
       },
-      business: true,
+      business: { include: { logo: true } },
       clients: true,
       mailsendToken: {
         select: { scopes: true },
@@ -25,9 +24,6 @@ const find = async (req, res) => {
 
   if (!user) {
     return res.status(404).json({ success: false, message: "User not found" });
-  }
-  if (user.business?.logo) {
-    user.business.logo = process.env.APP_URL + "/" + user.business.logo;
   }
 
   user.lastInvoiceNumber = user.invoices[0]?.invoiceNumber;

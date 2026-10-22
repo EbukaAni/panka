@@ -8,7 +8,7 @@ import { view } from "../utils/helpers.js";
 async function subscribe(req, res) {
   const plan = await prisma.plan.findFirst({
     where: { name: req.query.plan },
-    select: { name: true },
+    select: { name: true, price: true },
   });
   if (!plan) return res.redirect("/");
 
@@ -22,7 +22,7 @@ async function subscribe(req, res) {
     where: { userId: req.user.id },
     include: { plan: { select: { name: true } } },
   });
-  if (subscription.plan.name == plan.name)
+  if (subscription?.plan?.name == plan.name)
     return res.redirect("/account/dashboard");
 
   const response = await generatePaymentLink(
@@ -243,7 +243,6 @@ export async function getSubscriptionId(email) {
 }
 
 function parseEmail(email) {
-  if (process.env.NODE_ENV == "production") return email;
   return email.split("_")[2];
 }
 

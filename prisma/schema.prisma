@@ -42,9 +42,9 @@ model Business {
   email     String   @unique
   address   String?
   phone     String?
-  logo      String?
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logo      Logo?
 
   @@map("businesses")
 }
@@ -195,6 +195,8 @@ model PlanFeatures {
 
   plan    Plan    @relation(fields: [planId], references: [id], onDelete: Cascade)
   feature Feature @relation(fields: [featureId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, featureId])
 }
 
 model Feature {
@@ -233,16 +235,27 @@ model Card {
   user      User     @relation(fields: [userId], references: [id])
 }
 
-model sessions {
-  session_id String  @id @db.VarChar(128)
-  expires    Int     @db.UnsignedInt
-  data       String? @db.MediumText
+model Session {
+  id        String   @id
+  sid       String   @unique @db.VarChar(128)
+  expiresAt DateTime
+  data      String?  @db.MediumText
 }
 
 model IdempotencyKey {
   key       String   @id @db.VarChar(255)
   response  Json // Caches the successful response payload
   createdAt DateTime @default(now())
+}
+
+model Logo {
+  id         Int    @id @default(autoincrement())
+  businessId Int    @unique
+  providerId String
+  url        String
+  deleteUrl  String
+
+  business Business @relation(fields: [businessId], references: [id])
 }
 
 enum UserStatus {

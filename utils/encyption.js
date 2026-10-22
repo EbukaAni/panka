@@ -1,4 +1,8 @@
 import crypto from "crypto";
+import dotenv from "dotenv";
+import dotenvExpand from "dotenv-expand";
+
+dotenvExpand.expand(dotenv.config());
 
 const ALGORITHM = "aes-256-gcm";
 const KEY = Buffer.from(process.env.PRISMA_FIELD_ENCRYPTION_KEY, "hex");
@@ -22,6 +26,6 @@ export function decrypt(payload) {
   const decipher = crypto.createDecipheriv(ALGORITHM, KEY, iv);
   decipher.setAuthTag(authTag);
   return Buffer.concat([decipher.update(encrypted), decipher.final()]).toString(
-    "utf8"
+    "utf8",
   );
 }

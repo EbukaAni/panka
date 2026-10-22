@@ -3,7 +3,6 @@ import { prisma } from "../db.js";
 import Strategy from "passport-google-oauth20";
 
 const GoogleStrategy = Strategy.Strategy;
-
 passport.use(
   new GoogleStrategy(
     {

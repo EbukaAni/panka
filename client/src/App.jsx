@@ -316,9 +316,10 @@ function DashboardPage({ data }) {
   ];
 
   const usage = data.subscription.usage ?? 0;
-  const limit = data.subscription.plan.planFeatures.find(
-    ({ feature }) => feature.name == "recurringInvoiceLimit",
-  ).value;
+  const limit = 50;
+  // const limit = data.subscription.plan.planFeatures.find(
+  //   ({ feature }) => feature.name == "recurringInvoiceLimit",
+  // ).value;
 
   return (
     <>

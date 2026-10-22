@@ -1,4 +1,3 @@
-import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import notFound from "./middleware/notFound.js";
@@ -11,37 +10,46 @@ import passport from "./config/passport.js";
 import authRoutes from "./routes/auth.js";
 import { view } from "./utils/helpers.js";
 import subscriptionController from "./controllers/subscriptionController.js";
-import { invoiceErrorHandler } from "./controllers/invoiceController.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const isProduction = process.env.NODE_ENV === "production";
+const devClientUrl = "http://localhost:5173";
 
-app.use(authSession);
 app.use(
   cors({
     credentials: true,
-    origin: [
-      "chrome-extension://blipddhjepefmnklllfdeccbcmdnbbfb",
-      "http://localhost:5173",
-    ],
+    origin: [process.env.EXTENSION_ORIGIN, !isProduction ? devClientUrl : null],
   }),
 );
-app.use(passport.initialize());
-app.use(passport.session());
 app.use(express.static(path.join(__dirname, "public")));
 app.use(
   "/assets",
-  express.static(path.join(__dirname, "../client/dist/assets")),
+  isProduction
+    ? express.static(path.join(__dirname, "client/dist/assets"))
+    : (_, res) => {
+        res.redirect(devClientUrl);
+      },
 );
 
 app.get("/", (_, res) => {
   res.sendFile(view("home.html"));
 });
+app.use(authSession);
+app.get("/hello", (_, res) => {
+  res.send("hi");
+});
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.get("/account/dashboard/", ensureIsAuthenticated, (_, res) => {
-  res.sendFile(path.join(__dirname, "../client/dist/index.html"));
+  if (isProduction) {
+    return res.sendFile(path.join(__dirname, "client/dist/index.html"));
+  }
+  res.redirect(devClientUrl);
 });
 app.get("/subscribe", subscriptionController.subscribe);
 app.use("/auth", authRoutes);
@@ -49,7 +57,6 @@ app.use("/uploads", ensureIsAuthenticated, express.static("uploads"));
 
 app.use("/api", apiRoute);
 app.use(notFound);
-// app.use(invoiceErrorHandler);
 app.use(errorHandler);
 
 app.listen(PORT, () => {

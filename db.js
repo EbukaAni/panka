@@ -1,6 +1,5 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
-import "dotenv/config";
 import { decrypt, encrypt } from "./utils/encyption.js";
 
 const adapter = new PrismaMariaDb({
@@ -8,10 +7,17 @@ const adapter = new PrismaMariaDb({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  port: 3306,
+  port: process.env.DB_PORT,
+  ssl: { rejectUnauthorized: false },
+  connectionLimit: 20,
+  connectTimeout: 15000,
+  acquireTimeout: 30000,
 });
 
-export const basePrisma = new PrismaClient({ adapter });
+export const basePrisma = new PrismaClient({
+  adapter,
+  log: ["query"],
+});
 
 export const prisma = basePrisma.$extends({
   query: {

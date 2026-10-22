@@ -23,7 +23,6 @@ router.get(
   }),
   (req, res) => {
     const redirectTo = req.session.returnTo || "/account/dashboard";
-    console.log(redirectTo);
     delete req.session.returnTo;
     res.redirect(safeRedirect(redirectTo));
   },
