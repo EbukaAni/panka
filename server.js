@@ -19,7 +19,7 @@ const PORT = process.env.PORT || 5000;
 const isProduction = process.env.NODE_ENV === "production";
 const devClientUrl = "http://localhost:5173";
 
-if (isProd) app.set("trust proxy", 1);
+if (isProduction) app.set("trust proxy", 1);
 
 app.use(
   cors({
