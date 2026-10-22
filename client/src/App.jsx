@@ -20,7 +20,7 @@ const Plans = [
     description: "For businesses that want to automate their invoicing",
     features: [
       "Everything in basic",
-      "up to 50 recurring invoices per month",
+      "up to 40 recurring invoices per month",
       "50MB Cloud storage",
     ],
   },
@@ -316,10 +316,9 @@ function DashboardPage({ data }) {
   ];
 
   const usage = data.subscription.usage ?? 0;
-  const limit = 50;
-  // const limit = data.subscription.plan.planFeatures.find(
-  //   ({ feature }) => feature.name == "recurringInvoiceLimit",
-  // ).value;
+  const limit = data.subscription.plan.planFeatures.find(
+    ({ feature }) => feature.name == "recurringLimit",
+  ).value;
 
   return (
     <>
@@ -390,7 +389,7 @@ function SubscriptionPage({ subscription: sub }) {
   }
 
   async function cancelSubscription() {
-    const res = await fetch("http://localhost:5000/api/cancel_subscription", {
+    const res = await fetch("/api/cancel_subscription", {
       method: "post",
       credentials: "include",
     });
@@ -402,13 +401,10 @@ function SubscriptionPage({ subscription: sub }) {
   }
 
   async function reactivate() {
-    const res = await fetch(
-      "http://localhost:5000/api/reactivate-subscription",
-      {
-        method: "post",
-        credentials: "include",
-      },
-    );
+    const res = await fetch("/api/reactivate-subscription", {
+      method: "post",
+      credentials: "include",
+    });
     if (!res.ok) {
       showMessage("something went wrong ");
     }
@@ -766,7 +762,7 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/dashboard/data", {
+    fetch("/api/dashboard/data", {
       credentials: "include",
     })
       .then((res) => res.json())
