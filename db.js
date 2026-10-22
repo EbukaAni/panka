@@ -16,7 +16,6 @@ const adapter = new PrismaMariaDb({
 
 export const basePrisma = new PrismaClient({
   adapter,
-  log: ["query"],
 });
 
 export const prisma = basePrisma.$extends({

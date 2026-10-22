@@ -2,13 +2,15 @@ import passport from "passport";
 import { prisma } from "../db.js";
 import Strategy from "passport-google-oauth20";
 
+const appUrl = process.env.APP_URL || "";
+
 const GoogleStrategy = Strategy.Strategy;
 passport.use(
   new GoogleStrategy(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: process.env.GOOGLE_CALLBACK_URL,
+      callbackURL: `${appUrl}/auth/google/callback`,
       scope: ["profile", "email"],
     },
     async (accessToken, refreshToken, profile, done) => {
