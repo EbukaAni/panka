@@ -15,7 +15,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 4000;
 const isProduction = process.env.NODE_ENV === "production";
 const devClientUrl = "http://localhost:5173";
 
@@ -40,6 +40,10 @@ app.use(
 app.get("/", (_, res) => {
   res.sendFile(view("home.html"));
 });
+app.get("/privacy-policy", (_, res) => {
+  res.sendFile(view("privacy-policy.html"));
+});
+
 app.use(authSession);
 app.get("/hello", (_, res) => {
   res.send("hi");

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 
+const BASE_URL = "https://vocidy.com";
 const Plans = [
   {
     id: "free",
@@ -389,7 +390,7 @@ function SubscriptionPage({ subscription: sub }) {
   }
 
   async function cancelSubscription() {
-    const res = await fetch("/api/cancel_subscription", {
+    const res = await fetch(BASE_URL + "/api/cancel_subscription", {
       method: "post",
       credentials: "include",
     });
@@ -401,7 +402,7 @@ function SubscriptionPage({ subscription: sub }) {
   }
 
   async function reactivate() {
-    const res = await fetch("/api/reactivate-subscription", {
+    const res = await fetch(BASE_URL + "/api/reactivate-subscription", {
       method: "post",
       credentials: "include",
     });
@@ -634,7 +635,7 @@ function SettingsPage() {
 
   async function deleteAccount() {
     setLoadingAc(true);
-    const res = await fetch(`/api/data`, {
+    const res = await fetch(`${BASE_URL}/api/data`, {
       method: "delete",
     });
     if (!res.ok) {
@@ -762,7 +763,7 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/dashboard/data", {
+    fetch(BASE_URL + "/api/dashboard/data", {
       credentials: "include",
     })
       .then((res) => res.json())
