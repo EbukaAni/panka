@@ -16,7 +16,7 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 4000;
-const isProduction = process.env.NODE_ENV === "production";
+const isProduction = true; // process.env.NODE_ENV === "production";
 const devClientUrl = "http://localhost:5173";
 
 if (isProduction) app.set("trust proxy", 1);
@@ -45,9 +45,7 @@ app.get("/privacy-policy", (_, res) => {
 });
 
 app.use(authSession);
-app.get("/hello", (_, res) => {
-  res.send("hi");
-});
+
 app.use(passport.initialize());
 app.use(passport.session());
 
