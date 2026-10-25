@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
+const API_URL = import.meta.env.VITE_API_URL;
 
-const BASE_URL = "http://localhost:4000"; //https://vocidy.com";
 const Plans = [
   {
     id: "free",
@@ -250,7 +250,7 @@ function Sidebar({ page, setPage, open, setOpen, data }) {
 
         <div className="sidebar-bottom">
           <form
-            action={BASE_URL + "/auth/logout"}
+            action={API_URL + "/auth/logout"}
             method="post"
             className="nav-item logout"
           >
@@ -390,7 +390,7 @@ function SubscriptionPage({ subscription: sub }) {
   }
 
   async function cancelSubscription() {
-    const res = await fetch(BASE_URL + "/api/cancel_subscription", {
+    const res = await fetch(API_URL + "/api/cancel_subscription", {
       method: "post",
       credentials: "include",
     });
@@ -402,7 +402,7 @@ function SubscriptionPage({ subscription: sub }) {
   }
 
   async function reactivate() {
-    const res = await fetch(BASE_URL + "/api/reactivate-subscription", {
+    const res = await fetch(API_URL + "/api/reactivate-subscription", {
       method: "post",
       credentials: "include",
     });
@@ -635,7 +635,7 @@ function SettingsPage() {
 
   async function deleteAccount() {
     setLoadingAc(true);
-    const res = await fetch(`${BASE_URL}/api/data`, {
+    const res = await fetch(`${API_URL}/api/data`, {
       method: "delete",
     });
     if (!res.ok) {
@@ -763,7 +763,7 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(BASE_URL + "/api/dashboard/data", {
+    fetch(API_URL + "/api/dashboard/data", {
       credentials: "include",
     })
       .then((res) => res.json())
@@ -773,7 +773,7 @@ function App() {
       });
   }, []);
 
-  if (loading) return <span class="loader"></span>;
+  if (loading) return <span className="loader"></span>;
 
   const pages = {
     dashboard: <DashboardPage setPage={setPage} data={data} />,
