@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Privacy Policy – Panka</title>
+    <title>Privacy Policy – Vocidy</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -325,7 +325,7 @@
               <path d="M14 3v5h5" />
               <path d="M9 13h7M9 17h5" /></svg
           ></span>
-          [Extension Name]
+          Vocidy
         </a>
         <nav aria-label="Main">
           <ul>
@@ -342,7 +342,7 @@
       <div class="wrap">
         <h1>Privacy Policy</h1>
         <p>
-          <span class="num">Last updated: <mark>[Date]</mark></span>
+          <span class="num">Last updated: Oct 25, 2026</span>
         </p>
       </div>
     </div>
@@ -350,8 +350,10 @@
     <div class="trustline">
       <div class="wrap">
         <p>
-          Your invoices, client details and settings are stored on your own
-          device. We don’t sell your data, and we don’t use it for advertising.
+          Free users’ data stays on their own device. Pro users’ invoices,
+          customers and recurring invoices are stored in our database so they
+          sync across devices. We don’t sell your data, and we don’t use it for
+          advertising.
         </p>
       </div>
     </div>
@@ -363,6 +365,7 @@
         <a href="#collect">What we collect</a>
         <a href="#use">How we use it</a>
         <a href="#sharing">Sharing</a>
+        <a href="#customers">Your customers’ data</a>
         <a href="#permissions">Browser permissions</a>
         <a href="#retention">Storage and retention</a>
         <a href="#security">Security</a>
@@ -376,22 +379,24 @@
         <h2 id="about">About this policy</h2>
         <div class="summary">
           <p>
-            <strong>In short:</strong> everything you enter stays on your device
-            unless you choose to send, sync or export it. Anything that leaves
-            your device is described below.
+            <strong>In short:</strong> on the free plan, everything you enter
+            stays on your device. On Pro, your invoices, customers and recurring
+            invoices are also stored in our database so you can reach them from
+            any device. We never sell your data. Everything that leaves your
+            device is described below.
           </p>
         </div>
         <p>
-          This policy explains what information [Extension Name] (“the
-          extension”, “we”, “us”) handles when you use it to create and manage
-          invoices in Google Chrome. The extension is provided by
-          <mark>[Company or Your Name]</mark>, <mark>[City, Country]</mark>.
+          This policy explains what information Vocidy (“the extension”, “we”,
+          “us”) handles when you use it to create and manage invoices in Google
+          Chrome. The extension is provided by Vocidy, Nigeria.
         </p>
 
         <h2 id="collect">What we collect</h2>
         <p>
           The extension handles the following information, all of which you
-          enter yourself:
+          enter yourself. Free users’ data stays on their device. For Pro users,
+          we also store it in our database.
         </p>
         <div class="scroll">
           <table>
@@ -412,31 +417,41 @@
                 <td>To print them on your invoices</td>
               </tr>
               <tr>
-                <td>Client details</td>
-                <td>Client names, emails, addresses</td>
+                <td>Customer details</td>
+                <td>Customer names, emails, phone numbers, addresses</td>
                 <td>To address and send invoices</td>
               </tr>
               <tr>
                 <td>Invoice content</td>
-                <td>Line items, amounts, currency, dates, notes</td>
+                <td>
+                  Line items, amounts, currency, dates, notes, recurring invoice
+                  schedules
+                </td>
                 <td>To create, track and export invoices</td>
+              </tr>
+              <tr>
+                <td>Pro subscription details</td>
+                <td>
+                  Your email, plan, payment status, Flutterwave transaction
+                  reference, and billing date
+                </td>
+                <td>
+                  To activate Pro, confirm payment and handle support or refunds
+                </td>
               </tr>
               <tr>
                 <td>Settings</td>
                 <td>Invoice numbering, default currency, tax rates, theme</td>
                 <td>To remember your preferences</td>
               </tr>
-              <tr>
-                <td>Basic usage data <mark>[delete if none]</mark></td>
-                <td>Anonymous counts of features used, error reports</td>
-                <td>To fix bugs and improve the extension</td>
-              </tr>
             </tbody>
           </table>
         </div>
         <p>
           We do not collect passwords, browsing history or the content of pages
-          you visit, and we do not collect payment card numbers.
+          you visit, and we never see or store your card or bank details. When
+          you upgrade to Pro, those are entered on Flutterwave’s secure checkout
+          and handled by Flutterwave.
         </p>
 
         <h2 id="use">How we use it</h2>
@@ -447,8 +462,15 @@
           </li>
           <li>To remember your settings between sessions.</li>
           <li>
-            To diagnose problems and improve the extension, using anonymous data
-            only <mark>[delete if none]</mark>.
+            For Pro users, to store your data and keep it in sync across your
+            devices.
+          </li>
+          <li>
+            To create and send recurring invoices on the schedule you set.
+          </li>
+          <li>
+            To activate and manage Pro subscriptions, including confirming
+            payments and issuing refunds.
           </li>
           <li>To respond when you contact us for support.</li>
         </ul>
@@ -465,13 +487,26 @@
         <ul>
           <li>
             <strong>When you act.</strong> If you email, download or send an
-            invoice, it goes where you direct it.
+            invoice, it goes where you direct it. This includes recurring
+            invoices you schedule to send automatically >.
           </li>
           <li>
-            <strong>Service providers <mark>[delete if none]</mark>.</strong>
-            For example, a cloud sync provider, an email-sending service, or a
-            payment processor such as <mark>[Provider]</mark>. They process data
-            only to deliver that feature and under their own privacy terms.
+            <strong>Payment processor.</strong> Pro payments are processed by
+            Flutterwave. When you pay, Flutterwave collects your payment details
+            and your email directly, and tells us whether the payment succeeded.
+            Flutterwave acts under its own privacy policy, so please read it
+            before paying.
+          </li>
+          <li>
+            <strong>Hosting and database providers.</strong> Our servers are
+            hosted on Vercel. They process data only to host it and run the
+            service for us, under their own privacy terms.
+          </li>
+          <li>
+            <strong>Other service providers .</strong>
+            For example, a cloud sync provider or an email-sending service. They
+            process data only to deliver that feature and under their own
+            privacy terms.
           </li>
           <li>
             <strong>Legal reasons.</strong> If the law requires it, or to
@@ -491,6 +526,20 @@
           >, including its Limited Use requirements.
         </p>
 
+        <h2 id="customers">Your customers’ data</h2>
+        <p>
+          If you store information about your own customers in Vocidy (names,
+          emails, addresses and invoice history), you decide what is stored and
+          why. For Pro users, we process that information on your behalf, only
+          to provide the service, and we do not use it for our own purposes such
+          as marketing.
+        </p>
+        <p>
+          You are responsible for having a lawful basis to hold your customers’
+          data and for answering any requests they make to you. If a customer
+          contacts us directly, we will refer them to you where appropriate.
+        </p>
+
         <h2 id="permissions">Browser permissions</h2>
         <p>
           Chrome asks you to approve certain permissions. We request only what
@@ -502,35 +551,44 @@
             browser.
           </li>
           <li>
-            <code>downloads</code> <mark>[if used]</mark> lets you save invoices
-            as PDF or CSV files.
+            <code>downloads</code> lets you save invoices as PDF or CSV files.
           </li>
           <li>
-            <code>activeTab</code> <mark>[if used]</mark> works with the page
-            you are on only when you click the extension.
+            <code>activeTab</code> works with the page you are on only when you
+            click the extension.
           </li>
           <li>
-            <code>identity</code> <mark>[if used]</mark> signs you in, if you
-            choose to use an account.
+            <code>identity</code> signs you in, if you choose to use an account.
           </li>
         </ul>
 
         <h2 id="retention">Storage and retention</h2>
         <p>
-          By default, your data stays in your browser’s local extension storage
-          until you delete it or uninstall the extension. If you turn on
-          optional sync or backup <mark>[if offered]</mark>, that copy is kept
-          for as long as your account is active, and deleted within
-          <mark>[30]</mark> days of you closing it. Clearing the extension’s
-          data or uninstalling removes the local copy.
+          <strong>Free plan:</strong> your data stays in your browser’s local
+          extension storage until you delete it or uninstall the extension.
+        </p>
+        <p>
+          <strong>Pro plan:</strong> your data is stored in our database, hosted
+          on vercel, for as long as your Pro account is active. When you delete
+          an item, it is removed from our database immediately . If you cancel
+          Pro, we keep your data for 30 days so you can export it, then delete
+          it, or sooner if you ask us to. Backups may hold copies for up to 30
+          more days.
+        </p>
+        <p>
+          Records of Pro payments (such as the transaction reference and date)
+          are kept for as long as tax, accounting or consumer law requires,
+          usually up to 6 years, even if you delete your account.
         </p>
 
         <h2 id="security">Security</h2>
         <p>
           We use reasonable technical measures to protect your information,
-          including encrypted connections (HTTPS) for anything transmitted. No
-          method of storage or transmission is completely secure, so keep your
-          device and browser profile protected and back up important invoices.
+          including encrypted connections (HTTPS) for anything transmitted,
+          encryption at rest for our database, and access controls on the
+          systems that hold Pro data. No method of storage or transmission is
+          completely secure, so keep your device and browser profile protected
+          and back up important invoices.
         </p>
 
         <h2 id="rights">Your rights</h2>
@@ -543,11 +601,11 @@
           Consumer Privacy Act.
         </p>
         <p>
-          Because most data is stored on your device, you can exercise many of
-          these rights directly by editing, exporting or deleting it in the
-          extension. For anything we hold, email us at the address below and we
-          will respond within a reasonable time, and within
-          <mark>30 days</mark> where the law sets that deadline.
+          Free-plan data is on your device, and Pro data can be edited, exported
+          or deleted inside the extension, so you can exercise many of these
+          rights directly. For anything else we hold, email us at the address
+          below and we will respond within a reasonable time, and within 30 days
+          where the law sets that deadline.
         </p>
         <p>
           Where the NDPA or GDPR applies, our lawful bases are performing our
@@ -575,20 +633,16 @@
         <h2 id="contact">Contact</h2>
         <p>
           Questions or requests:
-          <a href="mailto:privacy@example.com"
-            ><mark>privacy@example.com</mark></a
-          ><br />
-          <mark>[Company or Your Name]</mark>, <mark>[Address]</mark>
+          <a href="mailto:contact@vocidy.com">contact@vocidy.com</a><br />
+          Vocidy, Anambra State, Nigeria.
         </p>
       </main>
     </div>
 
     <footer>
       <div class="wrap">
-        <a class="logo" href="/">[Extension Name]</a>
-        <p>
-          © <mark>[Year]</mark> [Company or Your Name]. All rights reserved.
-        </p>
+        <a class="logo" href="/">Vocidy</a>
+        <p>© 2026 Vocidy. All rights reserved.</p>
       </div>
     </footer>
   </body>

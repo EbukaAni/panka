@@ -1,6 +1,8 @@
 import passport from "passport";
 import { prisma } from "../db.js";
 import Strategy from "passport-google-oauth20";
+import mailer from "../services/MailNotifier.js";
+import Messages from "../services/Messages.js";
 
 const appUrl = process.env.APP_URL || "";
 
@@ -14,6 +16,9 @@ passport.use(
       scope: ["profile", "email"],
     },
     async (accessToken, refreshToken, profile, done) => {
+      const email = profile.emails?.[0]?.value;
+      const name = profile.displayName;
+
       try {
         let user = await prisma.user.findFirst({
           where: { googleId: profile.id },
@@ -23,8 +28,8 @@ passport.use(
           user = await prisma.user.create({
             data: {
               googleId: profile.id,
-              name: profile.displayName,
-              email: profile.emails?.[0]?.value,
+              name,
+              email,
               picture: profile.photos?.[0]?.value,
               status: "ACTIVE",
               subscription: {
@@ -37,6 +42,7 @@ passport.use(
             },
             select: { id: true, googleId: true, name: true, email: true },
           });
+          mailer.send(Messages.welcome({ to: email, name }));
         }
 
         return done(null, user);

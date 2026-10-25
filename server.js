@@ -16,7 +16,7 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 4000;
-const isProduction = true; // process.env.NODE_ENV === "production";
+const isProduction = process.env.NODE_ENV === "production";
 const devClientUrl = "http://localhost:5173";
 
 if (isProduction) app.set("trust proxy", 1);

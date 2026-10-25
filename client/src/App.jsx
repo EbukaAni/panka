@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-const BASE_URL = "https://vocidy.com";
+const BASE_URL = "http://localhost:4000"; //https://vocidy.com";
 const Plans = [
   {
     id: "free",
@@ -250,7 +250,7 @@ function Sidebar({ page, setPage, open, setOpen, data }) {
 
         <div className="sidebar-bottom">
           <form
-            action="http://localhost:5000/auth/logout"
+            action={BASE_URL + "/auth/logout"}
             method="post"
             className="nav-item logout"
           >
