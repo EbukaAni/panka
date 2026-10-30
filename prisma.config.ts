@@ -7,7 +7,7 @@ const host = process.env.DB_HOST;
 const port = process.env.DB_PORT;
 const database = process.env.DB_NAME;
 
-const DATABASE_URL = `mysql://${user}:${password}@${host}:${port}/${database}?ssl-mode=REQUIRED`;
+const DATABASE_URL = `mysql://${user}:${password}@${host}:${port}/${database}?ssl-mode=REQUIRED&connect_timeout=30`;
 
 export default defineConfig({
   schema: "prisma/schema.prisma",

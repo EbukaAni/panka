@@ -10,30 +10,56 @@ const createOrUpdate = async (req, res) => {
     info: { name, email, phone, address },
   } = matchedData(req);
 
-  const img = await imgbb.upload(req.file.buffer, {
-    name: req.file.originalname,
-  });
+  const hasLogo = Boolean(req.file?.buffer);
+  let img;
 
-  const options = {
+  if (hasLogo) {
+    img = await imgbb.upload(req.file.buffer, {
+      name: req.file.originalname,
+    });
+  }
+
+  const createOptions = {
     name,
     email,
     phone,
     address,
-    logo: {
-      create: { providerId: img.id, url: img.url, deleteUrl: img.deleteUrl },
-    },
+    ...(img && {
+      logo: {
+        create: { providerId: img.id, url: img.url, deleteUrl: img.deleteUrl },
+      },
+    }),
     user: {
       connect: {
         id: req.user.id,
       },
     },
   };
+  const updateOptions = {
+    ...createOptions,
+    ...(img && {
+      logo: {
+        upsert: {
+          create: {
+            providerId: img.id,
+            url: img.url,
+            deleteUrl: img.deleteUrl,
+          },
+          update: {
+            providerId: img.id,
+            url: img.url,
+            deleteUrl: img.deleteUrl,
+          },
+        },
+      },
+    }),
+  };
 
   const business = await prisma.business.upsert({
     where: { userId: req.user.id },
-    create: options,
-    update: options,
-    includes: { logo: true },
+    create: createOptions,
+    update: updateOptions,
+    ...(img && { include: { logo: true } }),
   });
   res.status(201).json(business);
 };
