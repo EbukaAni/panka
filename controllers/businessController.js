@@ -1,32 +1,30 @@
 import { matchedData } from "express-validator";
 import { prisma } from "../db.js";
-import { ImgBB } from "../utils/imgbb.js";
-import { includes } from "zod";
+import { put, del } from "@vercel/blob";
 
-const imgbb = new ImgBB();
-
-const createOrUpdate = async (req, res) => {
+const create = async (req, res) => {
   const {
     info: { name, email, phone, address },
   } = matchedData(req);
 
-  const hasLogo = Boolean(req.file?.buffer);
+  const newLogo = Boolean(req.file?.buffer);
   let img;
 
-  if (hasLogo) {
-    img = await imgbb.upload(req.file.buffer, {
-      name: req.file.originalname,
+  if (newLogo) {
+    img = await put(req.file.originalname, req.file.buffer, {
+      access: "public",
+      token: process.env.BLOB_READ_WRITE_TOKEN,
     });
   }
 
-  const createOptions = {
+  const options = {
     name,
     email,
     phone,
     address,
     ...(img && {
       logo: {
-        create: { providerId: img.id, url: img.url, deleteUrl: img.deleteUrl },
+        create: { url: img.url },
       },
     }),
     user: {
@@ -35,30 +33,50 @@ const createOrUpdate = async (req, res) => {
       },
     },
   };
-  const updateOptions = {
-    ...createOptions,
+
+  const business = await prisma.business.create({
+    data: options,
+    ...(img && { include: { logo: true } }),
+  });
+  res.status(201).json(business);
+};
+
+const update = async (req, res) => {
+  const {
+    info: { name, email, phone, address },
+  } = matchedData(req);
+
+  const newLogo = Boolean(req.file?.buffer);
+  let img;
+
+  if (newLogo) {
+    const oldLogo = await prisma.business.findFirst({
+      where: { id: Number(req.params.id) },
+      select: { logo: true },
+    });
+    if (oldLogo) await del(oldLogo.logo.url);
+
+    img = await put(req.file.originalname, req.file.buffer, {
+      access: "public",
+      token: process.env.BLOB_READ_WRITE_TOKEN,
+    });
+  }
+
+  const options = {
+    name,
+    email,
+    phone,
+    address,
     ...(img && {
       logo: {
-        upsert: {
-          create: {
-            providerId: img.id,
-            url: img.url,
-            deleteUrl: img.deleteUrl,
-          },
-          update: {
-            providerId: img.id,
-            url: img.url,
-            deleteUrl: img.deleteUrl,
-          },
-        },
+        update: { url: img.url },
       },
     }),
   };
 
-  const business = await prisma.business.upsert({
+  const business = await prisma.business.update({
     where: { userId: req.user.id },
-    create: createOptions,
-    update: updateOptions,
+    data: options,
     ...(img && { include: { logo: true } }),
   });
   res.status(201).json(business);
@@ -75,4 +93,4 @@ const find = async (req, res) => {
   res.json(business);
 };
 
-export default { find, createOrUpdate };
+export default { find, create, update };

@@ -81,7 +81,7 @@ const upload = multer({
 });
 
 router.post(
-  "/business/create_or_update",
+  "/business",
   upload.single("logo"),
   (req, _, next) => {
     req.body.info = JSON.parse(req.body.info);
@@ -105,7 +105,34 @@ router.post(
     }
     next();
   },
-  businessController.createOrUpdate,
+  businessController.create,
+);
+router.post(
+  "/business/:id",
+  upload.single("logo"),
+  (req, _, next) => {
+    req.body.info = JSON.parse(req.body.info);
+    next();
+  },
+  [
+    body(["info.name", "info.email"]).notEmpty(),
+    body(["info.phone", "info.address"]).optional({ values: "falsy" }),
+
+    validate,
+  ],
+  (req, res, next) => {
+    if (!req.file) {
+      return next();
+    }
+    const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+    if (!allowedTypes.includes(req.file.mimetype)) {
+      return res.status(400).json({
+        errors: [{ msg: "Invalid file type. Only JPEG, PNG, and JPG allowed" }],
+      });
+    }
+    next();
+  },
+  businessController.update,
 );
 
 router.use(express.json());

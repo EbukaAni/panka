@@ -1,8 +1,15 @@
 import crypto from "crypto";
 import dotenv from "dotenv";
 import dotenvExpand from "dotenv-expand";
+import path from "path";
 
-dotenvExpand.expand(dotenv.config());
+const isProd = process.env.NODE_ENV == "production";
+
+dotenvExpand.expand(
+  dotenv.config({
+    path: path.resolve(process.cwd(), isProd ? ".env" : ".env.local"),
+  }),
+);
 
 const ALGORITHM = "aes-256-gcm";
 const KEY = Buffer.from(process.env.PRISMA_FIELD_ENCRYPTION_KEY, "hex");
