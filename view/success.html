@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Payment successful | Vocidy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:wght@600;700&family=IBM+Plex+Mono&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --paper: #fbdcd1;
+        --paper-alt: #fcf3e1;
+        --ink: #191530;
+        --ink-soft: #4a4560;
+        --muted: #7a7590;
+        --line: #e4deef;
+        --purple: #2a546d;
+        --purple-deep: #397294;
+        --purple-tint: #efeafb;
+        --amber: #c8a96e;
+        --white: #ffffff;
+        --radius-sm: 4px;
+        --maxw: 1060px;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+        scroll-padding-top: 24px;
+      }
+      body {
+        background: var(--white);
+        color: var(--ink);
+        font-family: "Inter", sans-serif;
+        font-size: 16px;
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+      }
+      h1,
+      h2,
+      h3 {
+        font-family: "Source Serif 4", serif;
+        color: var(--ink);
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+      a {
+        color: inherit;
+      }
+      .wrap {
+        max-width: var(--maxw);
+        margin: 0 auto;
+        padding: 0 32px;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-family: "Inter", sans-serif;
+        font-weight: 600;
+        font-size: 15px;
+        padding: 8px 26px;
+        border-radius: var(--radius-sm);
+        border: 1px solid transparent;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background 0.15s ease;
+      }
+      .btn-primary {
+        background: var(--purple);
+        color: var(--white);
+      }
+      .btn-primary:hover {
+        background: var(--purple-deep);
+      }
+      .btn:focus-visible,
+      nav a:focus-visible,
+      .toc a:focus-visible {
+        outline: 2px solid var(--ink);
+        outline-offset: 2px;
+      }
+
+      header {
+        padding: 12px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      header .wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .logo {
+        color: var(--purple);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: "Source Serif 4", serif;
+        font-weight: 600;
+        font-size: 21px;
+        text-decoration: none;
+      }
+      header nav ul {
+        display: flex;
+        gap: 32px;
+        list-style: none;
+      }
+      header nav a {
+        text-decoration: none;
+        font-size: 14.5px;
+        color: var(--ink-soft);
+      }
+      header nav a:hover {
+        color: var(--ink);
+      }
+
+      .hero {
+        background: var(--paper);
+        padding: 48px 0;
+      }
+      .hero h1 {
+        font-size: clamp(2.3rem, 4vw, 3.25rem);
+        line-height: 1.08;
+        font-weight: 700;
+      }
+      .hero p {
+        margin-top: 14px;
+        font-size: 15px;
+        color: var(--ink-soft);
+      }
+      .hero .num {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 13.5px;
+      }
+
+      .trustline {
+        border-bottom: 1px solid var(--line);
+        padding: 22px 0;
+        background: var(--paper-alt);
+      }
+      .trustline p {
+        color: var(--ink-soft);
+        font-size: 15px;
+        max-width: 70ch;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 200px minmax(0, 1fr);
+        gap: 56px;
+        padding: 48px 0 72px;
+      }
+      .toc {
+        position: sticky;
+        top: 24px;
+        align-self: start;
+        font-size: 14px;
+      }
+      .toc p {
+        color: var(--muted);
+        margin-bottom: 10px;
+        font-size: 13.5px;
+      }
+      .toc a {
+        display: block;
+        text-decoration: none;
+        color: var(--ink-soft);
+        padding: 5px 0 5px 12px;
+        border-left: 2px solid var(--line);
+      }
+      .toc a:hover {
+        color: var(--purple);
+        border-left-color: var(--purple);
+      }
+
+      main {
+        max-width: 44rem;
+      }
+      main h2 {
+        font-size: clamp(1.4rem, 2.4vw, 1.7rem);
+        line-height: 1.2;
+        margin: 44px 0 12px;
+        padding-top: 24px;
+        border-top: 1px solid var(--ink);
+      }
+      main > h2:first-of-type {
+        margin-top: 0;
+      }
+      main p,
+      main li {
+        color: var(--ink-soft);
+        font-size: 15.5px;
+      }
+      main p {
+        margin-top: 12px;
+      }
+      main ul {
+        margin: 12px 0 0 20px;
+      }
+      main li {
+        margin: 6px 0;
+      }
+      main strong {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      main a {
+        color: var(--purple);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+      .summary {
+        background: var(--purple-tint);
+        border-left: 3px solid var(--purple);
+        padding: 16px 20px;
+        border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        margin-bottom: 8px;
+      }
+      .summary p {
+        margin-top: 4px;
+      }
+      .scroll {
+        overflow-x: auto;
+        margin-top: 14px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14.5px;
+      }
+      th,
+      td {
+        text-align: left;
+        vertical-align: top;
+        padding: 10px 12px 10px 0;
+        border-bottom: 1px solid var(--line);
+        color: var(--ink-soft);
+      }
+      th {
+        color: var(--ink);
+        font-weight: 600;
+        border-bottom: 1px solid var(--ink);
+      }
+      code {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 13.5px;
+        background: var(--purple-tint);
+        color: var(--purple);
+        padding: 1px 6px;
+        border-radius: var(--radius-sm);
+      }
+      mark {
+        background: var(--paper-alt);
+        color: var(--ink);
+        padding: 0 4px;
+        border-radius: var(--radius-sm);
+        box-shadow: inset 0 -2px 0 var(--amber);
+      }
+
+      footer {
+        padding: 24px 0;
+        border-top: 1px solid var(--line);
+      }
+      footer .wrap {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+      footer .logo {
+        font-size: 16px;
+      }
+      footer p {
+        color: var(--muted);
+        font-size: 13.5px;
+      }
+
+      @media (max-width: 860px) {
+        header nav {
+          display: none;
+        }
+        .layout {
+          grid-template-columns: 1fr;
+          gap: 28px;
+        }
+        .toc {
+          position: static;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+        * {
+          transition: none !important;
+        }
+      }
+
+      /* Page-specific additions */
+      body {
+        background: var(--paper-alt);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      header {
+        background: var(--white);
+      }
+      .content {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 48px 24px;
+      }
+      .card {
+        width: 100%;
+        max-width: 600px;
+        background: var(--white);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 48px 40px;
+        text-align: center;
+      }
+      .card h1 {
+        font-size: clamp(1.9rem, 4vw, 2.5rem);
+        line-height: 1.1;
+        font-weight: 700;
+      }
+      .card .sub {
+        margin-top: 10px;
+        color: var(--ink-soft);
+      }
+      .card .msg {
+        margin-top: 20px;
+        color: var(--ink-soft);
+        font-size: 15.5px;
+      }
+      .actions {
+        margin-top: 28px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+      }
+      .state[hidden] {
+        display: none;
+      }
+      .spinner {
+        width: 32px;
+        height: 32px;
+        margin: 0 auto 20px;
+        border: 3px solid var(--line);
+        border-top-color: var(--purple);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .spinner {
+          animation-duration: 2.4s;
+        }
+      }
+      @media (max-width: 480px) {
+        .card {
+          padding: 36px 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="wrap">
+        <a class="logo" href="/">Vocidy</a>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="card" aria-live="polite">
+        <!-- Waiting for the backend -->
+        <div class="state" id="state-pending">
+          <div class="spinner" aria-hidden="true"></div>
+          <h1>Activating your subscription</h1>
+          <p class="msg">
+            This only takes a few seconds. Please keep this page open.
+          </p>
+        </div>
+
+        <!-- Subscription created -->
+        <div class="state" id="state-active" hidden>
+          <h1>Welcome to Vocidy Pro</h1>
+          <p class="sub">Thank you for subscribing.</p>
+          <p class="msg">
+            Head back to the Vocidy extension or your dashboard to start using
+            Pro.
+          </p>
+          <div class="actions">
+            <a class="btn btn-primary" href="/dashboard">Go to dashboard</a>
+          </div>
+        </div>
+
+        <!-- Timed out -->
+        <div class="state" id="state-timeout" hidden>
+          <h1>Still activating</h1>
+          <p class="msg">
+            Your payment went through, but your subscription is taking longer
+            than expected to activate. Try again, or contact
+            <a href="mailto:support@vocidy.com">support@vocidy.com</a> if it
+            doesn&rsquo;t update.
+          </p>
+          <div class="actions">
+            <button class="btn btn-primary" id="retry" type="button">
+              Check again
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const STATUS_URL = "/api/subscription/status";
+      const POLL_INTERVAL_MS = 2000;
+      const MAX_WAIT_MS = 60000;
+
+      const states = {
+        pending: document.getElementById("state-pending"),
+        active: document.getElementById("state-active"),
+        timeout: document.getElementById("state-timeout"),
+      };
+
+      function show(name) {
+        for (const key in states) states[key].hidden = key !== name;
+      }
+
+      async function isActive() {
+        try {
+          const res = await fetch(STATUS_URL, {
+            credentials: "include",
+            cache: "no-store",
+          });
+          if (!res.ok) return false;
+          const data = await res.json();
+          return data.status === "active";
+        } catch (err) {
+          return false; // network or parse error: treat as not active yet
+        }
+      }
+
+      function startPolling() {
+        show("pending");
+        const startedAt = Date.now();
+
+        (async function poll() {
+          if (await isActive()) {
+            show("active");
+            return;
+          }
+          if (Date.now() - startedAt >= MAX_WAIT_MS) {
+            show("timeout");
+            return;
+          }
+          setTimeout(poll, POLL_INTERVAL_MS);
+        })();
+      }
+
+      document.getElementById("retry").addEventListener("click", startPolling);
+      startPolling();
+    </script>
+  </body>
+</html>

@@ -17,7 +17,7 @@ const Plans = [
   {
     id: "pro",
     name: "Pro",
-    price: "5",
+    price: "2",
     description: "For businesses that want to automate their invoicing",
     features: [
       "Everything in basic",

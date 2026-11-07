@@ -7,37 +7,40 @@ const create = async (req, res) => {
     info: { name, email, phone, address },
   } = matchedData(req);
 
-  const newLogo = Boolean(req.file?.buffer);
-  let img;
-
-  if (newLogo) {
-    img = await put(req.file.originalname, req.file.buffer, {
-      access: "public",
-      token: process.env.BLOB_READ_WRITE_TOKEN,
-    });
-  }
-
-  const options = {
-    name,
-    email,
-    phone,
-    address,
-    ...(img && {
-      logo: {
-        create: { url: img.url },
-      },
-    }),
-    user: {
-      connect: {
-        id: req.user.id,
+  const business = await prisma.business.create({
+    data: {
+      name,
+      email,
+      phone,
+      address,
+      user: {
+        connect: {
+          id: req.user.id,
+        },
       },
     },
-  };
-
-  const business = await prisma.business.create({
-    data: options,
-    ...(img && { include: { logo: true } }),
   });
+
+  const logo = Boolean(req.file?.buffer);
+
+  if (logo) {
+    const img = await put(
+      `business/${business.id}-${req.file.originalname}`,
+      req.file.buffer,
+      {
+        access: "public",
+        token: process.env.BLOB_READ_WRITE_TOKEN,
+      },
+    );
+    const logo = await prisma.logo.create({
+      data: {
+        url: img.url,
+        business: { connect: { id: business.id } },
+      },
+    });
+    business.logo = logo;
+  }
+
   res.status(201).json(business);
 };
 

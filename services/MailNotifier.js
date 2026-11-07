@@ -4,11 +4,13 @@ class MailNotifier {
   constructor({
     provider,
     from = process.env.MAIL_FROM,
+    replyTo = process.env.MAIL_REPLYTO,
     retries = 2,
     retryDelayMs = 1000,
   } = {}) {
     this.provider = provider || new MailgunProvider();
     this.from = from;
+    this.replyTo = replyTo;
     this.retries = retries;
     this.retryDelayMs = retryDelayMs;
   }
@@ -79,6 +81,7 @@ class MailNotifier {
   ) {
     const list = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
     const sender = from || this.from;
+    const contact = replyTo || this.replyTo;
 
     if (!sender) throw new Error('"from" is required (set MAIL_FROM)');
     if (toRequired && !list(to).length) throw new Error('"to" is required');
@@ -90,7 +93,7 @@ class MailNotifier {
       to: list(to),
       cc: list(cc),
       bcc: list(bcc),
-      replyTo,
+      replyTo: contact,
       subject,
       text,
       html,

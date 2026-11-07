@@ -19,59 +19,13 @@ import {
 import { authorize } from "../controllers/gmailController.js";
 import clientController from "../controllers/clientController.js";
 import multer from "multer";
-import { prisma } from "../db.js";
 import dashboardController from "../controllers/dashboardController.js";
 import { canAddRecurringInvoice } from "../middleware/canAddRecurrInvoice.js";
 import invoiceRoutes from "../routes/invoice.js";
-import { invoiceErrorHandler } from "../controllers/invoiceController.js";
+import { SendStatus } from "@prisma/client";
+import { prisma } from "../db.js";
 
 const router = express.Router();
-
-router.post("/login", async (req, res) => {
-  const token = (req.headers.authorization || "").replace("Bearer ", "");
-  if (!token) return res.status(401).json({ error: "No token" });
-
-  try {
-    const r = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!r.ok) return res.status(401).json({ error: "Invalid token" });
-
-    const { sub, email, name, picture } = await r.json();
-    let user = await prisma.user.findFirst({
-      where: { email },
-    });
-
-    if (!user) {
-      user = await prisma.user.create({
-        data: {
-          googleId: sub,
-          name,
-          email,
-          picture,
-          status: "ACTIVE",
-          subscription: {
-            create: {
-              plan: { connect: { name: "free" } },
-              status: "ACTIVE",
-              startDate: new Date(),
-            },
-          },
-        },
-        select: { id: true, googleId: true, name: true, email: true },
-      });
-    }
-
-    req.session.user = { id: user.id, email: user.email };
-    req.session.save((err) => {
-      if (err) return res.status(500).json({ error: "Session error" });
-      res.status(201).json({ user });
-    });
-  } catch (err) {
-    console.log(err);
-    res.status(401).json({ error: "Token verification failed" });
-  }
-});
 
 router.use(ensureIsAuthenticated);
 
@@ -168,6 +122,15 @@ router.get(
   ],
   subscriptionController.updateSubscription,
 );
+router.get("/subscription/status", async (req, res) => {
+  const subscription = await prisma.subscription.findFirst({
+    where: { userId: req.user.id },
+  });
+  if (subscription) {
+    return res.json({ status: subscription.status.toLowerCase() });
+  }
+  return SendStatus(409);
+});
 router.post("/cancel_subscription", subscriptionController.cancelSubscription);
 router.get("/dashboard/data", dashboardController.getData);
 router.get("/user", userController.find);

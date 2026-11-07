@@ -160,6 +160,7 @@ model Subscription {
   id                Int                @id @default(autoincrement())
   userId            Int                @unique
   planId            Int
+  providerId        String?
   startDate         DateTime
   endDate           DateTime?
   status            SubscriptionStatus
@@ -174,7 +175,7 @@ model Subscription {
 
 model Plan {
   id          Int      @id @default(autoincrement())
-  providerId  String?
+  providerId  String   @unique @default("null")
   name        String   @unique
   price       Int
   description String
@@ -217,7 +218,7 @@ model LedgerEntry {
   status                LedgerStatus
   transactionType       TransactionType
   paymentMethod         String
-  externalTransactionId Int             @unique
+  externalTransactionId String          @unique
   createdAt             DateTime        @default(now())
   user                  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -254,6 +255,11 @@ model Logo {
   url        String
 
   business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+}
+
+model WebhookEvent {
+  id        String   @id
+  createdAt DateTime @default(now())
 }
 
 enum UserStatus {

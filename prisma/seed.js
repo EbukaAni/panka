@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import path from "path";
 
+const isProd = true;
 dotenv.config({
   path: path.resolve(process.cwd(), isProd ? ".env" : ".env.local"),
 });
@@ -45,6 +46,7 @@ const plans = [
   {
     name: "Free",
     price: 0,
+    providerId: "null",
     description: "For getting started",
     features: {
       PdfExport: "true",
@@ -56,7 +58,7 @@ const plans = [
   {
     name: "Pro",
     price: 2,
-    providerId: "246528",
+    providerId: "prod_39d7ffeed7e04b91ad9e",
     description: "For businesses that want automation",
     features: {
       PdfExport: "true",

@@ -42,7 +42,12 @@ passport.use(
             },
             select: { id: true, googleId: true, name: true, email: true },
           });
-          mailer.send(Messages.welcome({ to: email, name }));
+          mailer.send(
+            Messages.welcome({
+              to: email,
+              name,
+            }),
+          );
         }
 
         return done(null, user);

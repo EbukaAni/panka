@@ -1,16 +1,20 @@
 import { matchedData } from "express-validator";
 import crypto from "crypto";
 import { prisma } from "../db.js";
-import { email } from "zod";
-import { userInfo } from "os";
-import { view } from "../utils/helpers.js";
+import { Bachs } from "@bachs/sdk";
+
+export const bachs = new Bachs({
+  apiKey: process.env.BACHS_KEY,
+});
 
 async function subscribe(req, res) {
   const plan = await prisma.plan.findFirst({
     where: { name: req.query.plan },
-    select: { name: true, price: true },
+    select: { name: true, price: true, providerId: true },
   });
-  if (!plan) return res.redirect("/");
+  if (!plan) {
+    return res.redirect("/");
+  }
 
   if (!req.user) {
     const url = new URLSearchParams({
@@ -22,22 +26,20 @@ async function subscribe(req, res) {
     where: { userId: req.user.id },
     include: { plan: { select: { name: true } } },
   });
-  if (subscription?.plan?.name == plan.name)
+  if (subscription?.plan?.name == plan.name) {
     return res.redirect("/account/dashboard");
-
-  const response = await generatePaymentLink(
-    req.user,
-    plan,
-    "create_subscription",
-  );
-  if (!response.ok) {
-    return res.redirect("/");
   }
-  const {
-    data: { link },
-  } = await response.json();
 
-  res.redirect(link);
+  const checkout = await bachs.checkoutSessions.create(
+    {
+      product_cart: [{ product_id: plan.providerId }],
+      customer: { email: req.user.email, name: req.user.name },
+      success_url: `${process.env.TUNNEL_URL || process.env.APP_URL}/subscription/success`,
+    },
+    { idempotencyKey: `checkout-${crypto.randomUUID()}` },
+  );
+
+  res.redirect(checkout.checkout_url);
 }
 
 async function activate(req, res) {
@@ -65,52 +67,43 @@ async function activate(req, res) {
   return res.json({ subscription });
 }
 
-async function createSubscription(req, res) {
-  const { status, tx_ref } = matchedData(req);
-  const transaction_id = req.query["transaction_id"];
-
-  if (status !== "successful") return res.redirect("/");
-  const response = await verify(transaction_id);
-
-  if (!response.ok)
-    return res.status(500).json({ error: "unable to verify transaction" });
-  const { data } = await response.json();
-
-  if (data.status !== "successful") return res.redirect("/");
-
-  const now = new Date();
-  const userEmail = parseEmail(data.customer.email);
+async function createSubscription(event) {
+  const {
+    data: {
+      customer: { email },
+      amount,
+      subscription_id,
+      collection_method,
+      current_period_start,
+      current_period_end,
+      product_id,
+    },
+  } = event;
+  // console.log(event);
 
   await prisma.user.update({
-    where: { uq_email_status: { email: userEmail, status: "ACTIVE" } },
+    where: { uq_email_status: { email, status: "ACTIVE" } },
     data: {
-      card: {
-        upsert: {
-          create: { type: data.card.type, ending: data.card.last_4digits },
-          update: { type: data.card.type, ending: data.card.last_4digits },
-        },
-      },
       subscription: {
         update: {
+          providerId: subscription_id,
           status: "ACTIVE",
-          startDate: now,
-          endDate: addOneMonth(new Date(now)),
-          plan: { connect: { name: data.meta.plan } },
+          startDate: current_period_start,
+          endDate: current_period_end,
+          plan: { connect: { providerId: product_id } },
         },
       },
       ledgerEntries: {
         create: {
-          amount: data.amount,
+          amount: parseInt(amount),
           status: "PAID",
-          paymentMethod: data.payment_type,
-          externalTransactionId: data.id,
+          paymentMethod: collection_method,
+          externalTransactionId: subscription_id,
           transactionType: "SUBSCRIPTION_START",
         },
       },
     },
   });
-
-  return res.redirect("/account/dashboard");
 }
 
 async function updateSubscription(req, res) {
