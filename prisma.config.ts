@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import path from "path";
 import { defineConfig } from "prisma/config";
 
-const isProd = false;
+const isProd = true;
 
 dotenv.config({
   path: path.resolve(process.cwd(), isProd ? ".env" : ".env.local"),
