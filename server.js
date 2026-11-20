@@ -108,6 +108,10 @@ if (isProduction) {
   app.get("/dashboard", ensureIsAuthenticated, (_, res) => {
     return res.sendFile(path.join(__dirname, "client/dist/index.html"));
   });
+  app.use(
+    "/assets",
+    express.static(path.join(__dirname, "client/dist/assets")),
+  );
   app.use(notFound);
 } else {
   app.use(
