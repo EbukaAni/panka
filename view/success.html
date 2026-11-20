@@ -432,7 +432,7 @@
     <script>
       const STATUS_URL = "/api/subscription/status";
       const POLL_INTERVAL_MS = 2000;
-      const MAX_WAIT_MS = 60000;
+      const MAX_WAIT_MS = 10000;
 
       const states = {
         pending: document.getElementById("state-pending"),
@@ -449,6 +449,7 @@
           const res = await fetch(STATUS_URL, {
             credentials: "include",
             cache: "no-store",
+            contentType: "application/json",
           });
           if (!res.ok) return false;
           const data = await res.json();

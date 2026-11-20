@@ -1,6 +1,7 @@
 import session from "express-session";
 import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 import { prisma } from "../db.js";
+import jwt from "jsonwebtoken";
 
 const store = new PrismaSessionStore(prisma, {
   checkPeriod: 60 * 60 * 1000,
@@ -26,14 +27,18 @@ export function ensureIsAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
     return next();
   }
-  if (req.session.user) {
-    req.user = req.session.user;
+  const token = req.headers.authorization?.split(" ")[1];
+  try {
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
     return next();
+  } catch {
+    return res.status(401).json({ error: "Unauthorized" });
   }
-  if (req.headers["content-type"] !== "application/json") {
-    return res.redirect("/");
+  if (req.headers["content-type"] == "application/json") {
+    res.status(401).json({ error: "Unauthorized" });
+  } else {
+    return res.redirect("/login");
   }
-  res.status(401).json({ message: "unauthorized" });
 }
 
 export async function authorizeRecurring(req, res, next) {

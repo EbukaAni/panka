@@ -22,12 +22,16 @@ import multer from "multer";
 import dashboardController from "../controllers/dashboardController.js";
 import { canAddRecurringInvoice } from "../middleware/canAddRecurrInvoice.js";
 import invoiceRoutes from "../routes/invoice.js";
-import { SendStatus } from "@prisma/client";
 import { prisma } from "../db.js";
+import { authRouter, publicRouter } from "./apiAuth.js";
 
 const router = express.Router();
 
+router.use(publicRouter);
+
 router.use(ensureIsAuthenticated);
+
+router.use(authRouter);
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -92,35 +96,23 @@ router.post(
 router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
 
-router.post("/logout", (req, res, next) => {
-  req.logout((err) => {
-    if (err) return next(err);
-    req.session.destroy(() => {
-      res.status(204).end();
-    });
+router.get("/subscription", async (req, res) => {
+  const params = req.query;
+  const sub = await prisma.subscription.findFirst({
+    where: { userId: req.user.id },
+    ...(params.include && { include: { [params.include]: true } }),
   });
+  res.json(sub);
 });
-
 router.get(
-  "/create_subscription",
+  "/subscription/create",
   [
     query(["status", "tx_ref"])
       .notEmpty()
       .withMessage("this field is required"),
     validate,
   ],
-  subscriptionController.createSubscription,
-);
-router.post("/reactivate-subscription", subscriptionController.activate);
-router.get(
-  "/update_subscription",
-  [
-    query(["transaction_id", "tx_ref"])
-      .notEmpty()
-      .withMessage("this field is required"),
-    validate,
-  ],
-  subscriptionController.updateSubscription,
+  subscriptionController.create,
 );
 router.get("/subscription/status", async (req, res) => {
   const subscription = await prisma.subscription.findFirst({
@@ -129,9 +121,9 @@ router.get("/subscription/status", async (req, res) => {
   if (subscription) {
     return res.json({ status: subscription.status.toLowerCase() });
   }
-  return SendStatus(409);
+  return res.sendStatus(409);
 });
-router.post("/cancel_subscription", subscriptionController.cancelSubscription);
+router.post("/subscription/cancel", subscriptionController.requestCancelation);
 router.get("/dashboard/data", dashboardController.getData);
 router.get("/user", userController.find);
 router.delete("/user", userController.deleteUser);

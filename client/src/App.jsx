@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-const API_URL = import.meta.env.VITE_API_URL;
 
 const Plans = [
   {
@@ -213,7 +212,7 @@ function Sidebar({ page, setPage, open, setOpen, data }) {
     ["settings", "Settings"],
   ];
 
-  if (data.subscription.plan.name !== "free") {
+  if (data.subscription) {
     navigation.splice(2, 0, ["billing", "Billing"]);
   }
 
@@ -250,7 +249,7 @@ function Sidebar({ page, setPage, open, setOpen, data }) {
 
         <div className="sidebar-bottom">
           <form
-            action={API_URL + "/auth/logout"}
+            action={"/auth/logout"}
             method="post"
             className="nav-item logout"
           >
@@ -300,26 +299,33 @@ function DashboardPage({ data }) {
       icon: "trend",
       color: "green",
     },
-    {
-      title: "Next Billing",
-      value: "Oct 9",
-      description: "2026",
-      icon: "calendar",
-      color: "orange",
-    },
+    ...(data.subscription
+      ? [
+          {
+            title: "Next Billing",
+            value: new Date(data.subscription.endDate)
+              .toDateString()
+              .slice(0, -4),
+            description: "when subscription renews",
+            icon: "calendar",
+            color: "orange",
+          },
+        ]
+      : []),
     {
       title: "Current Plan",
-      value: data.subscription.plan.name,
-      description: `$${data.subscription.plan.price} / month`,
+      value: data.subscription?.plan?.name || "Free",
+      description: `$${data.subscription?.plan.price || 0} / month`,
       icon: "card",
       color: "purple",
     },
   ];
 
-  const usage = data.subscription.usage ?? 0;
-  const limit = data.subscription.plan.planFeatures.find(
-    ({ feature }) => feature.name == "recurringLimit",
-  ).value;
+  const usage = data.subscription?.usage ?? 0;
+  const limit =
+    data.subscription?.plan.planFeatures.find(
+      ({ feature }) => feature.name == "recurringLimit",
+    ).value || 0;
 
   return (
     <>
@@ -351,7 +357,7 @@ function DashboardPage({ data }) {
             </div>
 
             <span className="badge badge-purple">
-              {data.subscription.plan.name}
+              {data.subscription?.plan.name || "Free"}
             </span>
           </div>
 
@@ -381,6 +387,9 @@ function DashboardPage({ data }) {
 function SubscriptionPage({ subscription: sub }) {
   const [subscription, setSubscription] = useState(sub);
   const [message, setMessage] = useState();
+  const [loading, setLoading] = useState(false);
+
+  const userPlan = subscription?.plan.name.toLowerCase() || "free";
 
   function showMessage(msg) {
     setMessage(msg);
@@ -390,27 +399,58 @@ function SubscriptionPage({ subscription: sub }) {
   }
 
   async function cancelSubscription() {
-    const res = await fetch(API_URL + "/api/cancel_subscription", {
+    setLoading(true);
+    const res = await fetch("/api/subscription/cancel", {
       method: "post",
       credentials: "include",
     });
     if (!res.ok) {
       showMessage("something went wrong ");
     }
-    const { subscription } = await res.json();
-    setSubscription(subscription);
+    startPolling();
   }
 
-  async function reactivate() {
-    const res = await fetch(API_URL + "/api/reactivate-subscription", {
-      method: "post",
+  const POLL_INTERVAL_MS = 2000;
+  const MAX_WAIT_MS = 10000;
+
+  async function confirmCancelation() {
+    const res = await fetch("/api/subscription/status", {
       credentials: "include",
+      headers: { "Content-Type": "application/json" },
     });
     if (!res.ok) {
       showMessage("something went wrong ");
+      return false;
     }
-    const { subscription } = await res.json();
-    setSubscription(subscription);
+    const sub = await res.json();
+    return sub.status == "canceling" || sub.status == "canceled";
+  }
+
+  function startPolling() {
+    const startedAt = Date.now();
+
+    (async function poll() {
+      const confirmed = await confirmCancelation();
+      if (confirmed) {
+        const res = await fetch("/api/subscription?include=plan", {
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+        });
+        if (!res.ok) {
+          return showMessage("something went wrong ");
+        }
+        const sub = await res.json();
+        setSubscription(sub);
+        setLoading(false);
+        return;
+      }
+      if (Date.now() - startedAt >= MAX_WAIT_MS) {
+        showMessage("timeout");
+        setLoading(false);
+        return;
+      }
+      setTimeout(poll, POLL_INTERVAL_MS);
+    })();
   }
 
   function capitalizeInitial(str) {
@@ -427,16 +467,16 @@ function SubscriptionPage({ subscription: sub }) {
         <div className="current-plan">
           <div>
             <span className="eyebrow">Current plan</span>
-            <h2>{capitalizeInitial(subscription.plan.name)}</h2>
+            <h2>{capitalizeInitial(userPlan)}</h2>
             <p style={{ marginBottom: "16px" }}>
-              ${subscription.plan.price}/month{". "}
-              {subscription.endDate && subscription.status == "CANCELING"
+              ${subscription?.plan.price || 0}/month{". "}
+              {subscription?.endDate && subscription?.status == "CANCELING"
                 ? "Ends on"
                 : "Renews on"}{" "}
-              {new Date(subscription.endDate).toDateString()}
+              {new Date(subscription?.endDate).toDateString()}
             </p>
 
-            {subscription.plan.name == "free" ? (
+            {userPlan == "free" ? (
               <a
                 style={{ textDecoration: "none" }}
                 href="/subscribe?plan=pro"
@@ -444,17 +484,17 @@ function SubscriptionPage({ subscription: sub }) {
               >
                 Upgrade
               </a>
-            ) : subscription.status == "CANCELING" ? (
-              <>
-                <button onClick={reactivate} className="secondary-button">
-                  Reactivate
-                </button>
-              </>
-            ) : (
+            ) : subscription?.status == "CANCELING" ? null : (
               <button
-                className="danger-button cancel"
+                className="danger-button cancel flex"
                 onClick={cancelSubscription}
               >
+                {loading && (
+                  <span
+                    className="rotating-loader"
+                    style={{ marginRight: "4px" }}
+                  ></span>
+                )}
                 Cancel
               </button>
             )}
@@ -462,8 +502,8 @@ function SubscriptionPage({ subscription: sub }) {
           </div>
           <div>
             <span className="status-badge">
-              {subscription.status == "CANCELING" ||
-              subscription.status == "CANCELED"
+              {subscription?.status == "CANCELING" ||
+              subscription?.status == "CANCELED"
                 ? "canceled"
                 : "active"}
             </span>
@@ -478,10 +518,10 @@ function SubscriptionPage({ subscription: sub }) {
           <div
             key={plan.id}
             className={`plan-card ${
-              plan.id === subscription?.plan.name ? "plan-card-current" : ""
+              plan.id === userPlan ? "plan-card-current" : ""
             }`}
           >
-            {plan.id === subscription.plan.name && (
+            {plan.id === userPlan && (
               <span className="current-label">Current plan</span>
             )}
             <h3>{plan.name}</h3>
@@ -508,15 +548,12 @@ function SubscriptionPage({ subscription: sub }) {
               }}
               href={`/subscribe?plan=${plan.id}`}
               className={
-                plan.id === subscription?.plan.name
+                plan.id === userPlan || plan.id == "free"
                   ? "disabled-button"
                   : "primary-button full-width"
               }
-              disabled={plan.id === subscription?.plan.name}
             >
-              {plan.id === subscription?.plan.name
-                ? "Current plan"
-                : `Choose ${plan.name}`}
+              {plan.id === userPlan ? "Current plan" : `Choose ${plan.name}`}
             </a>
           </div>
         ))}
@@ -525,72 +562,15 @@ function SubscriptionPage({ subscription: sub }) {
   );
 }
 
-function BillingPage({ card, subscription, ledgerEntries }) {
+function BillingPage({ ledgerEntries }) {
   return (
     <>
       <PageHeader
-        title="Billing"
-        description="Manage payment methods and view invoices."
+        title="Subscription history"
+        description="Your previous payments and invoices."
       />
 
-      <div className="billing-grid">
-        <div className="card">
-          <h2>Payment method</h2>
-
-          <div className="payment-method">
-            <div className="payment-icon">
-              <Icon name="card" size={22} />
-            </div>
-
-            <div>
-              <strong>
-                {card.type ?? "-"} ending in {card.ending ?? "-"}
-              </strong>
-            </div>
-          </div>
-
-          <button
-            className="text-button"
-            onClick={() => alert("Mock payment method update")}
-          >
-            Update payment method
-          </button>
-        </div>
-
-        <div className="card">
-          <h2>Billing summary</h2>
-
-          <div className="billing-summary">
-            <div>
-              <span>Current plan</span>
-              <strong>{subscription.plan.name}</strong>
-            </div>
-
-            <div>
-              <span>Monthly cost</span>
-              <strong>${subscription.plan.price}</strong>
-            </div>
-
-            <div>
-              <span>
-                {subscription.status == "CANCELING"
-                  ? "Ends on"
-                  : "Next payment"}
-              </span>
-              <strong>{new Date(subscription.endDate).toDateString()}</strong>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div className="card invoice-card">
-        <div className="card-header">
-          <div>
-            <h2>Subscription history</h2>
-            <p>Your previous payments and invoices.</p>
-          </div>
-        </div>
-
         <div className="table-wrapper">
           <table>
             <thead>
@@ -763,8 +743,11 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(API_URL + "/api/dashboard/data", {
+    fetch("/api/dashboard/data", {
       credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
     })
       .then((res) => res.json())
       .then((data) => {
@@ -778,13 +761,7 @@ function App() {
   const pages = {
     dashboard: <DashboardPage setPage={setPage} data={data} />,
     subscription: <SubscriptionPage subscription={data.subscription} />,
-    billing: (
-      <BillingPage
-        card={data.card}
-        subscription={data.subscription}
-        ledgerEntries={data.ledgerEntries}
-      />
-    ),
+    billing: <BillingPage ledgerEntries={data.ledgerEntries} />,
     settings: <SettingsPage />,
   };
 

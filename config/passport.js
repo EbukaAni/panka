@@ -4,7 +4,7 @@ import Strategy from "passport-google-oauth20";
 import mailer from "../services/MailNotifier.js";
 import Messages from "../services/Messages.js";
 
-const appUrl = process.env.APP_URL || "";
+const appUrl = process.env.TUNNEL_URL || process.env.APP_URL || "";
 
 const GoogleStrategy = Strategy.Strategy;
 passport.use(
@@ -32,13 +32,6 @@ passport.use(
               email,
               picture: profile.photos?.[0]?.value,
               status: "ACTIVE",
-              subscription: {
-                create: {
-                  plan: { connect: { name: "free" } },
-                  status: "ACTIVE",
-                  startDate: new Date(),
-                },
-              },
             },
             select: { id: true, googleId: true, name: true, email: true },
           });

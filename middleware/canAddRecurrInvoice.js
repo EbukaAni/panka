@@ -14,13 +14,8 @@ export async function canAddRecurringInvoice(req, res, next) {
     },
   });
 
-  const canAddRec =
-    sub.plan.planFeatures.find(
-      ({ feature }) => feature.name == "addRecurringInvoice",
-    ).value == "true";
-
   const limit = sub.plan.planFeatures.find(
-    ({ feature }) => feature.name == "recurringInvoiceLimit",
+    ({ feature }) => feature.name == "recurringLimit",
   ).value;
   const invoiceCount = await prisma.recurringInvoice.count({
     where: { userId: req.user.id },
@@ -31,9 +26,5 @@ export async function canAddRecurringInvoice(req, res, next) {
       .status(400)
       .json({ message: "limit reached can not add more recurring invoices" });
   }
-  if (!canAddRec)
-    return res
-      .status(403)
-      .json({ message: "you do not have access to this resource" });
   next();
 }

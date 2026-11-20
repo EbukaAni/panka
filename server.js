@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import { createProxyMiddleware } from "http-proxy-middleware";
 import { webhooks, BachsWebhookError } from "@bachs/sdk";
 import notFound from "./middleware/notFound.js";
 import errorHandler from "./middleware/errorHandler.js";
@@ -12,6 +13,7 @@ import authRoutes from "./routes/auth.js";
 import { view } from "./utils/helpers.js";
 import subscriptionController from "./controllers/subscriptionController.js";
 import { prisma } from "./db.js";
+import ledgerController from "./controllers/ledgerController.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,28 +21,22 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 4000;
 const isProduction = process.env.NODE_ENV === "production";
-const devClientUrl = "http://localhost:5173";
 
 if (isProduction) app.set("trust proxy", 1);
 
 app.use(
   cors({
     credentials: true,
-    origin: [process.env.EXTENSION_ORIGIN, !isProduction ? devClientUrl : null],
+    origin: [process.env.EXTENSION_ORIGIN],
   }),
 );
 app.use("/public", express.static(path.join(__dirname, "public")));
-app.use(
-  "/assets",
-  isProduction
-    ? express.static(path.join(__dirname, "client/dist/assets"))
-    : (_, res) => {
-        res.redirect(devClientUrl);
-      },
-);
 
 app.get("/", (_, res) => {
   res.sendFile(view("home.html"));
+});
+app.get("/login", (_, res) => {
+  res.sendFile(view("login.html"));
 });
 app.get("/privacy-policy", (_, res) => {
   res.sendFile(view("privacy-policy.html"));
@@ -65,11 +61,22 @@ app.post(
       if (result) return res.sendStatus(200);
       switch (event.type) {
         case "customer.subscription.created":
-          await subscriptionController.createSubscription(event);
+          await withEvent(() => subscriptionController.create(event), event.id);
+          break;
+        case "customer.subscription.updated":
+          if (event.data["cancel_at_period_end"]) {
+            await withEvent(
+              () => subscriptionController.cancel(event),
+              event.id,
+            );
+          }
+          break;
+        case "invoice.paid":
+          await withEvent(() => ledgerController.create(event), event.id);
+          break;
         default:
           break;
       }
-      await prisma.webhookEvent.create({ data: { id: event.id } });
 
       return res.sendStatus(200);
     } catch (err) {
@@ -82,23 +89,38 @@ app.post(
   },
 );
 
+async function withEvent(fn, id) {
+  await fn();
+  await prisma.webhookEvent.create({ data: { id } });
+}
+
 app.use(authSession);
 
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.get("/account/dashboard", ensureIsAuthenticated, (_, res) => {
-  if (isProduction) {
-    return res.sendFile(path.join(__dirname, "client/dist/index.html"));
-  }
-  res.redirect(devClientUrl);
-});
 app.get("/subscribe", subscriptionController.subscribe);
 app.use("/auth", authRoutes);
 app.use("/uploads", ensureIsAuthenticated, express.static("uploads"));
 
 app.use("/api", apiRoute);
-app.use(notFound);
+if (isProduction) {
+  app.get("/dashboard", ensureIsAuthenticated, (_, res) => {
+    return res.sendFile(path.join(__dirname, "client/dist/index.html"));
+  });
+  app.use(notFound);
+} else {
+  app.use(
+    "/",
+    ensureIsAuthenticated,
+    createProxyMiddleware({
+      target: "http://localhost:5174",
+      changeOrigin: true,
+      ws: true, // needed for Vite's HMR websocket
+    }),
+  );
+}
+
 app.use(errorHandler);
 
 app.listen(PORT, () => {

@@ -53,15 +53,15 @@ const update = async (req, res) => {
   let img;
 
   if (newLogo) {
-    const oldLogo = await prisma.business.findFirst({
-      where: { id: Number(req.params.id) },
-      select: { logo: true },
+    const oldLogo = await prisma.Logo.findFirst({
+      where: { businessId: Number(req.params.id) },
     });
     if (oldLogo) await del(oldLogo.logo.url);
 
     img = await put(req.file.originalname, req.file.buffer, {
       access: "public",
       token: process.env.BLOB_READ_WRITE_TOKEN,
+      allowOverwrite: true,
     });
   }
 
@@ -72,7 +72,10 @@ const update = async (req, res) => {
     address,
     ...(img && {
       logo: {
-        update: { url: img.url },
+        upsert: {
+          create: { url: img.url },
+          update: { url: img.url },
+        },
       },
     }),
   };

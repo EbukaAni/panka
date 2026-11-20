@@ -30,6 +30,7 @@ model User {
   subscription      Subscription?
   mailsendToken     mailSendToken?
   card              Card?
+  refreshTokens     RefreshToken[]
 
   @@unique([email, status], name: "uq_email_status")
   @@map("users")
@@ -160,9 +161,9 @@ model Subscription {
   id                Int                @id @default(autoincrement())
   userId            Int                @unique
   planId            Int
-  providerId        String?
+  providerId        String             @unique
   startDate         DateTime
-  endDate           DateTime?
+  endDate           DateTime
   status            SubscriptionStatus
   localDataMigrated Boolean            @default(false)
   createdAt         DateTime           @default(now())
@@ -170,6 +171,7 @@ model Subscription {
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   plan              Plan               @relation(fields: [planId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, status], name: "uq_user_status")
   @@map("subscriptions")
 }
 
@@ -212,15 +214,15 @@ model Feature {
 }
 
 model LedgerEntry {
-  id                    Int             @id @default(autoincrement())
+  id                    Int          @id @default(autoincrement())
   userId                Int
   amount                Int
   status                LedgerStatus
-  transactionType       TransactionType
-  paymentMethod         String
-  externalTransactionId String          @unique
-  createdAt             DateTime        @default(now())
-  user                  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  externalTransactionId String       @unique
+  periodStart           DateTime
+  periodEnd             DateTime
+  createdAt             DateTime     @default(now())
+  user                  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([status])
@@ -260,6 +262,23 @@ model Logo {
 model WebhookEvent {
   id        String   @id
   createdAt DateTime @default(now())
+}
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  familyId  String
+  used      Boolean   @default(false)
+  usedAt    DateTime?
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([familyId])
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 enum UserStatus {
@@ -306,12 +325,4 @@ enum SubscriptionStatus {
 enum LedgerStatus {
   PAID
   FAILED
-  REFUNDED
-  PENDING
-  CANCELED
-}
-
-enum TransactionType {
-  SUBSCRIPTION_START
-  RENEWAL
 }

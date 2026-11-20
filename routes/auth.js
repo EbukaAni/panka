@@ -22,7 +22,7 @@ router.get(
     keepSessionInfo: true,
   }),
   (req, res) => {
-    const redirectTo = req.session.returnTo || "/account/dashboard";
+    const redirectTo = req.session.returnTo || "/dashboard";
     delete req.session.returnTo;
     res.redirect(safeRedirect(redirectTo));
   },

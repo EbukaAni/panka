@@ -26,6 +26,11 @@
   --shadow-md: 0 8px 24px rgba(25, 21, 48, 0.06);
 }
 
+.flex {
+  display: flex;
+  align-items: center;
+}
+
 .loader {
   --color-1: rgba(255, 255, 255, 0.15);
   --color-2: #5671f6;
@@ -57,6 +62,30 @@
   }
   100% {
     width: 100%;
+  }
+}
+
+.rotating-loader {
+  --color-1: #fff;
+  --color-2: #ff3d00;
+  --size: 1px;
+
+  width: calc(16 * var(--size));
+  height: calc(16 * var(--size));
+  border: calc(2 * var(--size)) solid var(--color-1);
+  border-bottom-color: var(--color-2);
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
   }
 }
 

@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Something went wrong</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #eef1f5;
+        --ink: #1b2430;
+        --muted: #55606f;
+        --accent: #d2452f;
+        --on-accent: #ffffff;
+        --line: #c9d0da;
+        color-scheme: light;
+        box-sizing: border-box;
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --bg: #141a23;
+          --ink: #e8ecf2;
+          --muted: #9aa5b5;
+          --accent: #ff8a73;
+          --on-accent: #1d0f0b;
+          --line: #2e3745;
+          color-scheme: dark;
+        }
+      }
+      :root[data-theme="dark"] {
+        --bg: #141a23;
+        --ink: #e8ecf2;
+        --muted: #9aa5b5;
+        --accent: #ff8a73;
+        --on-accent: #1d0f0b;
+        --line: #2e3745;
+        color-scheme: dark;
+      }
+      html {
+        height: 100%;
+        scroll-padding-top: env(safe-area-inset-top, 0px);
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100%;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          "Bricolage Grotesque",
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          Arial,
+          sans-serif;
+        line-height: 1.5;
+      }
+      main {
+        width: 100%;
+        max-width: 34rem;
+      }
+      .code {
+        display: flex;
+        align-items: center;
+        gap: 0.04em;
+        margin: 0 0 0.15em;
+        font-size: clamp(5.5rem, 22vw, 9rem);
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: -0.04em;
+      }
+      .ring {
+        width: 0.62em;
+        height: 0.62em;
+        border: 0.13em solid var(--accent);
+        border-radius: 50%;
+      }
+      /* the second ring is cut open: something broke on the server */
+      .ring.open {
+        border-right-color: transparent;
+        transform: rotate(20deg);
+      }
+      h1 {
+        margin: 0 0 0.5rem;
+        font-size: 1.75rem;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+      }
+      p {
+        margin: 0 0 1.75rem;
+        max-width: 30rem;
+        color: var(--muted);
+        font-size: 1.0625rem;
+      }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+      }
+      .btn {
+        display: inline-block;
+        padding: 0.7rem 1.2rem;
+        border: 2px solid var(--accent);
+        border-radius: 8px;
+        font: inherit;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: var(--on-accent);
+      }
+      .btn-secondary {
+        background: transparent;
+        color: var(--accent);
+      }
+      .btn:focus-visible {
+        outline: 3px solid var(--ink);
+        outline-offset: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="code" aria-hidden="true">
+        <span>5</span><span class="ring"></span><span class="ring open"></span>
+      </div>
+      <h1>Something went wrong on our end</h1>
+      <p>
+        The server hit an unexpected problem. It isn’t anything you did. Reload
+        the page, and if the error continues, try again in a few minutes.
+      </p>
+      <div class="actions">
+        <button class="btn btn-primary" type="button" id="reload">
+          Reload page
+        </button>
+        <a class="btn btn-secondary" href="/">Go to homepage</a>
+      </div>
+    </main>
+    <script>
+      document.getElementById("reload").addEventListener("click", function () {
+        location.reload();
+      });
+    </script>
+  </body>
+</html>
